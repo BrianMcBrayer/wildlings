@@ -1,0 +1,28 @@
+.git
+.gitignore
+.github
+
+# Node
+node_modules
+app/node_modules
+app/dist
+app/.vite
+
+# Python
+__pycache__
+*.py[cod]
+*.egg-info
+.venv
+api/.venv
+.mypy_cache
+.pytest_cache
+.ruff_cache
+
+# Env/logs
+.env
+.env.*
+*.log
+
+# Misc
+.DS_Store
+Thumbs.db
