@@ -27,3 +27,27 @@ Use this file to capture decisions, assumptions, and context needed across slice
 - Added `useTimer` hook plus `startTimerWithOutbox`/`stopTimerWithOutbox` helpers with TDD coverage for start/stop behavior.
 - Timer mutations write logs/outbox in a Dexie transaction, then persist `metadata` active state via helpers; this avoided flaky metadata updates in multi-store transactions during tests.
 - Updated outbox assertions to avoid relying on insertion order when reading the sync queue.
+
+## 2026-01-04
+
+- Added manual log creation and update helpers (`createManualLogWithOutbox`, `updateLogWithOutbox`) with runtime checks for required end times.
+- Blocked editing/deleting the active log in data-layer helpers to enforce “no edit while active” before UI work.
+
+## 2026-01-05
+
+- Added `useLogs` hook to load visible logs (excluding tombstones), expose active timer metadata, and refresh after create/update/delete operations.
+- Covered hook behavior with TDD in `app/tests/useLogs.test.ts` to ensure list refreshes and tombstones stay hidden.
+
+## 2026-01-06
+
+- Added stats calculation helper in `app/src/db/stats.ts` to compute all-time and per-year totals from local logs using local year boundaries.
+- Added TDD coverage in `app/tests/stats.test.ts`, including timezone boundary handling and tombstone/active log exclusion.
+
+## 2026-01-07
+
+- Added `useStats` hook to load logs/metadata, compute totals, and surface yearly goal data when it matches the active year.
+- Added TDD coverage for `useStats` in `app/tests/useStats.test.ts`, including refresh behavior and goal filtering.
+
+## 2026-01-08
+
+- Added `StatsSummary` UI component backed by `useStats` with tests to render totals and yearly goal progress.

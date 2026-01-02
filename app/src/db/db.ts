@@ -148,6 +148,19 @@ const enqueueOp = async (
   await db.sync_queue.add(op);
 };
 
+const requireManualEndAt = (endAt: string | null) => {
+  if (!endAt) {
+    throw new Error('Manual logs require an end time');
+  }
+};
+
+const assertLogNotActive = async (db: WildlingsDb, logId: string, action: string) => {
+  const metadata = await getMetadata(db);
+  if (metadata.active_log_id === logId) {
+    throw new Error(`Cannot ${action} an active log`);
+  }
+};
+
 export const upsertLogWithOutbox = async (db: WildlingsDb, log: LogRecord) => {
   await db.transaction('rw', db.logs, db.sync_queue, db.metadata, async () => {
     const deviceId = await getOrCreateDeviceId(db);
@@ -162,12 +175,91 @@ export const upsertLogWithOutbox = async (db: WildlingsDb, log: LogRecord) => {
   });
 };
 
+export const createManualLogWithOutbox = async (
+  db: WildlingsDb,
+  params: {
+    startAt: string;
+    endAt: string | null;
+    note?: string | null;
+    updatedAtLocal: string;
+  },
+) => {
+  requireManualEndAt(params.endAt);
+
+  const log: LogRecord = {
+    id: createUuid(),
+    start_at: params.startAt,
+    end_at: params.endAt,
+    note: params.note ?? null,
+    updated_at_local: params.updatedAtLocal,
+    deleted_at_local: null,
+    updated_at_server: null,
+    deleted_at_server: null,
+  };
+
+  await db.transaction('rw', db.logs, db.sync_queue, db.metadata, async () => {
+    const deviceId = await getOrCreateDeviceId(db);
+    await db.logs.put(log);
+    await enqueueOp(db, {
+      deviceId,
+      action: 'upsert',
+      recordId: log.id,
+      payload: log,
+      createdAtLocal: log.updated_at_local,
+    });
+  });
+
+  return log;
+};
+
+export const updateLogWithOutbox = async (
+  db: WildlingsDb,
+  params: {
+    logId: string;
+    startAt: string;
+    endAt: string | null;
+    note?: string | null;
+    updatedAtLocal: string;
+  },
+) => {
+  requireManualEndAt(params.endAt);
+
+  return db.transaction('rw', db.logs, db.sync_queue, db.metadata, async () => {
+    await assertLogNotActive(db, params.logId, 'edit');
+    const existing = await db.logs.get(params.logId);
+    if (!existing) {
+      throw new Error(`Log ${params.logId} not found`);
+    }
+
+    const updated: LogRecord = {
+      ...existing,
+      start_at: params.startAt,
+      end_at: params.endAt,
+      note: params.note ?? null,
+      updated_at_local: params.updatedAtLocal,
+    };
+
+    const deviceId = await getOrCreateDeviceId(db);
+    await db.logs.put(updated);
+    await enqueueOp(db, {
+      deviceId,
+      action: 'upsert',
+      recordId: updated.id,
+      payload: updated,
+      createdAtLocal: updated.updated_at_local,
+    });
+
+    return updated;
+  });
+};
+
 export const deleteLogWithOutbox = async (
   db: WildlingsDb,
   logId: string,
   deletedAtLocal: string,
 ) => {
   await db.transaction('rw', db.logs, db.sync_queue, db.metadata, async () => {
+    await assertLogNotActive(db, logId, 'delete');
     const deviceId = await getOrCreateDeviceId(db);
     const updated = await db.logs.update(logId, {
       deleted_at_local: deletedAtLocal,
