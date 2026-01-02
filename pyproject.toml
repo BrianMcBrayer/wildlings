@@ -1,0 +1,12 @@
+[project]
+name = "wildlings-tools"
+version = "0.1.0"
+description = "Development tooling for Wildlings."
+requires-python = ">=3.12"
+
+[dependency-groups]
+dev = [
+  "pre-commit>=3.7.1",
+  "ruff>=0.9.9",
+  "ty>=0.0.8",
+]

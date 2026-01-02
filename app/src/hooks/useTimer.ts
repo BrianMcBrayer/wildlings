@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
-import type { WildlingsDb, LogRecord } from "../db/db";
-import { getMetadata, startTimerWithOutbox, stopTimerWithOutbox } from "../db/db";
+import { useCallback, useEffect, useState } from 'react';
+import type { WildlingsDb, LogRecord } from '../db/db';
+import { getMetadata, startTimerWithOutbox, stopTimerWithOutbox } from '../db/db';
 
 type UseTimerOptions = {
   now?: () => string;
@@ -14,10 +14,7 @@ type UseTimerResult = {
   stopTimer: (endAt?: string) => Promise<LogRecord>;
 };
 
-export const useTimer = (
-  db: WildlingsDb,
-  options: UseTimerOptions = {},
-): UseTimerResult => {
+export const useTimer = (db: WildlingsDb, options: UseTimerOptions = {}): UseTimerResult => {
   const [activeLogId, setActiveLogId] = useState<string | null>(null);
   const [activeStartAt, setActiveStartAt] = useState<string | null>(null);
   const now = options.now ?? (() => new Date().toISOString());

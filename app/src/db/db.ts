@@ -1,4 +1,4 @@
-import Dexie, { type Table } from "dexie";
+import Dexie, { type Table } from 'dexie';
 
 export type LogRecord = {
   id: string;
@@ -11,12 +11,12 @@ export type LogRecord = {
   deleted_at_server: string | null;
 };
 
-export type SyncAction = "upsert" | "delete";
+export type SyncAction = 'upsert' | 'delete';
 
 export type SyncQueueRecord = {
   op_id: string;
   device_id: string;
-  entity: "log";
+  entity: 'log';
   action: SyncAction;
   record_id: string;
   payload: Record<string, unknown>;
@@ -36,7 +36,7 @@ export type MetadataRecord = {
   yearly_goal_year: number | null;
 };
 
-const METADATA_ID = "singleton";
+const METADATA_ID = 'singleton';
 
 class WildlingsDb extends Dexie {
   logs!: Table<LogRecord, string>;
@@ -46,22 +46,21 @@ class WildlingsDb extends Dexie {
   constructor(name: string) {
     super(name);
     this.version(1).stores({
-      logs:
-        "id, start_at, end_at, updated_at_local, deleted_at_local, updated_at_server, deleted_at_server",
-      sync_queue: "op_id, device_id, entity, action, record_id, created_at_local",
-      metadata: "id",
+      logs: 'id, start_at, end_at, updated_at_local, deleted_at_local, updated_at_server, deleted_at_server',
+      sync_queue: 'op_id, device_id, entity, action, record_id, created_at_local',
+      metadata: 'id',
     });
   }
 }
 
-export const createDb = (name = "wildlings") => new WildlingsDb(name);
+export const createDb = (name = 'wildlings') => new WildlingsDb(name);
 
 const createUuid = () => {
   if (globalThis.crypto?.randomUUID) {
     return globalThis.crypto.randomUUID();
   }
 
-  throw new Error("crypto.randomUUID is not available");
+  throw new Error('crypto.randomUUID is not available');
 };
 
 const emptyMetadata = (): MetadataRecord => ({
@@ -116,10 +115,7 @@ export const clearActiveTimer = async (db: WildlingsDb) => {
   });
 };
 
-export const setYearlyGoal = async (
-  db: WildlingsDb,
-  params: { year: number; hours: number },
-) => {
+export const setYearlyGoal = async (db: WildlingsDb, params: { year: number; hours: number }) => {
   await getMetadata(db);
   await db.metadata.update(METADATA_ID, {
     yearly_goal_year: params.year,
@@ -140,7 +136,7 @@ const enqueueOp = async (
   const op: SyncQueueRecord = {
     op_id: createUuid(),
     device_id: params.deviceId,
-    entity: "log",
+    entity: 'log',
     action: params.action,
     record_id: params.recordId,
     payload: params.payload,
@@ -153,12 +149,12 @@ const enqueueOp = async (
 };
 
 export const upsertLogWithOutbox = async (db: WildlingsDb, log: LogRecord) => {
-  await db.transaction("rw", db.logs, db.sync_queue, db.metadata, async () => {
+  await db.transaction('rw', db.logs, db.sync_queue, db.metadata, async () => {
     const deviceId = await getOrCreateDeviceId(db);
     await db.logs.put(log);
     await enqueueOp(db, {
       deviceId,
-      action: "upsert",
+      action: 'upsert',
       recordId: log.id,
       payload: log,
       createdAtLocal: log.updated_at_local,
@@ -171,7 +167,7 @@ export const deleteLogWithOutbox = async (
   logId: string,
   deletedAtLocal: string,
 ) => {
-  await db.transaction("rw", db.logs, db.sync_queue, db.metadata, async () => {
+  await db.transaction('rw', db.logs, db.sync_queue, db.metadata, async () => {
     const deviceId = await getOrCreateDeviceId(db);
     const updated = await db.logs.update(logId, {
       deleted_at_local: deletedAtLocal,
@@ -184,7 +180,7 @@ export const deleteLogWithOutbox = async (
 
     await enqueueOp(db, {
       deviceId,
-      action: "delete",
+      action: 'delete',
       recordId: logId,
       payload: {
         id: logId,
@@ -195,14 +191,11 @@ export const deleteLogWithOutbox = async (
   });
 };
 
-export const startTimerWithOutbox = async (
-  db: WildlingsDb,
-  params: { startAt: string },
-) =>
+export const startTimerWithOutbox = async (db: WildlingsDb, params: { startAt: string }) =>
   (async () => {
     const metadata = await getMetadata(db);
     if (metadata.active_log_id) {
-      throw new Error("Timer already active");
+      throw new Error('Timer already active');
     }
 
     const log: LogRecord = {
@@ -217,11 +210,11 @@ export const startTimerWithOutbox = async (
     };
 
     const deviceId = await getOrCreateDeviceId(db);
-    await db.transaction("rw", db.logs, db.sync_queue, async () => {
+    await db.transaction('rw', db.logs, db.sync_queue, async () => {
       await db.logs.put(log);
       await enqueueOp(db, {
         deviceId,
-        action: "upsert",
+        action: 'upsert',
         recordId: log.id,
         payload: log,
         createdAtLocal: log.updated_at_local,
@@ -232,14 +225,11 @@ export const startTimerWithOutbox = async (
     return log;
   })();
 
-export const stopTimerWithOutbox = async (
-  db: WildlingsDb,
-  params: { endAt: string },
-) =>
+export const stopTimerWithOutbox = async (db: WildlingsDb, params: { endAt: string }) =>
   (async () => {
     const metadata = await getMetadata(db);
     if (!metadata.active_log_id) {
-      throw new Error("No active timer");
+      throw new Error('No active timer');
     }
 
     const existing = await db.logs.get(metadata.active_log_id);
@@ -254,11 +244,11 @@ export const stopTimerWithOutbox = async (
     };
 
     const deviceId = await getOrCreateDeviceId(db);
-    await db.transaction("rw", db.logs, db.sync_queue, async () => {
+    await db.transaction('rw', db.logs, db.sync_queue, async () => {
       await db.logs.put(updated);
       await enqueueOp(db, {
         deviceId,
-        action: "upsert",
+        action: 'upsert',
         recordId: updated.id,
         payload: updated,
         createdAtLocal: updated.updated_at_local,

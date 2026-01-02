@@ -13,12 +13,14 @@ A specialized **offline-first PWA** for tracking time spent outdoors (inspired b
 ## 1. Product Vision
 
 ### 1.1 Goals
+
 - Track outdoor time via a simple **Start/Stop timer** and manual logs.
 - Work **seamlessly offline** (local-first): the app must remain fully usable without network.
 - Sync to server when possible: **safe retries**, no data loss, predictable conflict handling.
 - Provide simple **Stats** toward a **configurable yearly goal**.
 
 ### 1.2 Non-goals (for now)
+
 - Multi-user accounts / internal auth (proxy handles access).
 - Real-time collaboration.
 - Complex analytics beyond totals/progress.
@@ -26,6 +28,7 @@ A specialized **offline-first PWA** for tracking time spent outdoors (inspired b
 - Import/export tooling.
 
 ### 1.3 Key behavioral rules (must be enforced)
+
 - Single profile only (one global log stream per device).
 - **At most one active timer** per device at a time.
 - All timestamps are stored as **UTC instants** (ISO-8601). UI may display local time.
@@ -40,21 +43,25 @@ A specialized **offline-first PWA** for tracking time spent outdoors (inspired b
 ## 2. Environment & Infrastructure
 
 ### 2.1 Deployment
+
 - Dockerized deployment on **unRAID**
 - Behind a reverse proxy (e.g., **Nginx Proxy Manager** / **Traefik**)
 - Container registry: **GHCR** (GitHub Container Registry)
 
 ### 2.2 Security model (trusted boundary)
+
 - **No internal authentication** in the app.
 - The reverse proxy is the access control boundary.
 
 **Operational safety requirements (must be true in deployment):**
+
 - Backend must bind to an internal network interface only (not directly exposed to the public internet).
 - Proxy must terminate HTTPS.
 - Backend must enforce **strict CORS** (same-origin by default).
 - Backend must only trust `X-Forwarded-*` headers from the proxy network/IP range.
 
 **Optional safety gate (allowed even with “no auth”):**
+
 - If `INTERNAL_SYNC_TOKEN` env var is set, `/sync/*` endpoints must require header:
   - `X-Internal-Token: <value>`
 - If unset, do not require it. (This is a deployment hardening switch, not “user auth”.)
@@ -64,16 +71,18 @@ A specialized **offline-first PWA** for tracking time spent outdoors (inspired b
 ## 3. Tech Stack Specifications
 
 ### 3.1 Frontend
+
 - Framework: **TanStack Start** (React + Vite)
 - Routing/State: **TanStack Router** (file-based routing)
 - Local DB: **Dexie.js** (IndexedDB)
 - Data fetching/sync: **TanStack Query**
 - Styling: **Tailwind CSS**
-- Validation: **Zod** (preferred) or equivalent runtime schema validator  
+- Validation: **Zod** (preferred) or equivalent runtime schema validator
   (Used to enforce API contracts + local data invariants.)
 - Frontend package management: **npm**
 
 ### 3.4 Documentation sources (use latest)
+
 - TanStack Start/Router (React): https://github.com/TanStack/router/tree/main/docs/start/framework/react
 - Dexie.js: https://dexie.org/docs/
 - TanStack Query (React): https://tanstack.com/query/latest/docs/framework/react/overview
@@ -82,6 +91,7 @@ A specialized **offline-first PWA** for tracking time spent outdoors (inspired b
 - Vite PWA plugin: https://vite-pwa-org.netlify.app/
 
 ### 3.2 Backend
+
 - Framework: **FastAPI** (Python 3.12+)
 - Database: **PostgreSQL**
 - ORM/models: **SQLModel**
@@ -90,12 +100,14 @@ A specialized **offline-first PWA** for tracking time spent outdoors (inspired b
 - Python package management: **uv** only
 
 ### 3.5 Backend documentation sources (use latest)
+
 - FastAPI: https://fastapi.tiangolo.com/
 - SQLModel: https://sqlmodel.tiangolo.com/
 - Pydantic v2: https://docs.pydantic.dev/latest/
 - Alembic: https://alembic.sqlalchemy.org/en/latest/
 
 ### 3.3 Testing
+
 - Frontend: **Vitest** + React Testing Library + **MSW**
 - Backend: **Pytest** + **HTTPX** (ASGI test client)
 - Contract testing: OpenAPI + runtime validation on both sides (see §6.4)
@@ -104,7 +116,7 @@ A specialized **offline-first PWA** for tracking time spent outdoors (inspired b
 
 ## 4. Strict Development Protocol (STRICT TDD)
 
-All code must follow **Red → Green → Refactor**.  
+All code must follow **Red → Green → Refactor**.
 Agents are **forbidden** from submitting implementation code without corresponding tests.
 
 1. **Red:** Add a failing test in:
@@ -115,11 +127,14 @@ Agents are **forbidden** from submitting implementation code without correspondi
 4. **Always run tests twice:** once before changes to capture the failing state (Red), and again after changes to confirm Green.
 
 ### 4.1 Required checks before PR / submission
+
 Frontend:
+
 - `pnpm test` (or `npm test`)
 - `pnpm typecheck` (TypeScript strict, `tsc --noEmit`)
 
 Backend:
+
 - `pytest`
 - (Optional but recommended) `ruff` / `black` if configured in repo
 
@@ -130,19 +145,23 @@ If these scripts don’t exist yet, create them with tests first.
 ## 5. Architectural Rules & Patterns
 
 ## 5.1 Offline-first data model (Local DB is source of truth)
+
 - **Source of Truth:** Dexie (IndexedDB) is the primary source of truth for UI state.
 - UI reads/writes local DB first; server is a replication target.
 - All mutations (create/update/delete) must:
-  1) Apply to local tables atomically, AND
-  2) Append an operation to `sync_queue` (outbox)
+  1. Apply to local tables atomically, AND
+  2. Append an operation to `sync_queue` (outbox)
 
 ### 5.1.1 Dexie tables (required)
+
 - `logs`
 - `sync_queue`
 - `metadata`
 
 #### logs (local)
+
 Minimum fields:
+
 - `id: string` (UUID, generated client-side)
 - `start_at: string` (UTC ISO-8601)
 - `end_at: string | null` (UTC ISO-8601; null while active)
@@ -151,12 +170,15 @@ Minimum fields:
 - `deleted_at_local: string | null` (tombstone for local deletes)
 
 Sync-related fields stored locally (mirrors server state):
+
 - `updated_at_server: string | null`
 - `deleted_at_server: string | null`
 
 #### sync_queue (outbox)
+
 Each row is an operation that can be retried safely.
 Minimum fields:
+
 - `op_id: string` (UUID, generated client-side; stable for retries)
 - `device_id: string`
 - `entity: "log"`
@@ -168,6 +190,7 @@ Minimum fields:
 - `last_error: string | null`
 
 #### metadata
+
 - `device_id: string` (persisted forever once created)
 - `active_log_id: string | null`
 - `active_start_at: string | null` (UTC ISO-8601)
@@ -177,7 +200,9 @@ Minimum fields:
 - `yearly_goal_year: number | null`
 
 ### 5.1.2 Active timer persistence (must survive restarts)
+
 When the timer starts/stops:
+
 - Immediately persist `active_log_id` and `active_start_at` to `metadata`.
 - Do not rely on in-memory React state for timer truth.
 
@@ -186,26 +211,31 @@ When the timer starts/stops:
 ## 5.2 Sync Engine (reliable, retryable, and browser-realistic)
 
 ### 5.2.1 Connectivity principles
+
 - `navigator.onLine` is **only a hint**. Do not trust it as truth.
 - Sync should be **opportunistic** and triggered by user/app activity.
 
 ### 5.2.2 When to attempt sync (minimum triggers)
+
 - On app startup
 - When the app becomes visible (`visibilitychange`)
 - After a mutation (debounced; e.g., 1–3 seconds)
 - When a previously failing request succeeds (resume attempts)
 
 ### 5.2.3 Retry strategy
+
 - Use exponential backoff with jitter after failures.
 - Persist backoff state (or next-attempt time) in `metadata` so restarts don’t spam.
 
 ### 5.2.4 Conflict resolution rule (server-authoritative LWW)
+
 - “Last Write Wins” is based on **server** ordering:
   - `updated_at_server` (or a server version) is the tiebreaker.
 - Client clocks may be wrong; do not use client timestamps for final ordering.
 - Conflicts are applied silently (no user-facing conflict UI in MVP).
 
 ### 5.2.5 Deletes must be tombstoned
+
 - Deleting a log sets `deleted_at_local` immediately and enqueues a `"delete"` op.
 - Server stores `deleted_at_server` and returns tombstones during pull.
 - Never hard-delete in a way that could cause resurrection on pull.
@@ -216,6 +246,7 @@ When the timer starts/stops:
 ## 6. Sync API Contract (MUST MATCH EXACTLY)
 
 The sync protocol must support:
+
 - Offline creation (client-generated IDs)
 - Safe retries (idempotency)
 - Pagination / no missed updates (cursor)
@@ -223,12 +254,14 @@ The sync protocol must support:
 - Server-authoritative timestamps
 
 ### 6.1 Identity & idempotency (required)
+
 - Client generates and persists a stable `device_id` in `metadata`.
 - Each outbox operation has a stable `op_id`.
 - Server MUST deduplicate ops by `(device_id, op_id)`.
 - No device ID reset UI in MVP.
 
 ### 6.2 Endpoints
+
 - `POST /sync/push`
 - `GET  /sync/pull?cursor=<opaque_cursor>`
 - Cursor is managed client-side; server remains stateless with respect to cursors.
@@ -236,6 +269,7 @@ The sync protocol must support:
 ### 6.3 Schemas (JSON)
 
 #### 6.3.1 POST /sync/push — Request
+
 ```json
 {
   "device_id": "uuid",
@@ -259,7 +293,7 @@ The sync protocol must support:
     }
   ]
 }
-````
+```
 
 #### 6.3.2 POST /sync/push — Response
 
@@ -318,13 +352,13 @@ The sync protocol must support:
 
 ### 6.4 Schema parity enforcement (no “hand-wavy” parity)
 
-* Backend must expose accurate OpenAPI.
-* Frontend must validate API payloads at runtime (Zod schemas).
-* Any change to sync payloads requires:
+- Backend must expose accurate OpenAPI.
+- Frontend must validate API payloads at runtime (Zod schemas).
+- Any change to sync payloads requires:
 
-  * Backend test update (Pytest)
-  * Frontend contract test update (Vitest)
-  * Updated examples in this file (AGENTS.md)
+  - Backend test update (Pytest)
+  - Frontend contract test update (Vitest)
+  - Updated examples in this file (AGENTS.md)
 
 ---
 
@@ -332,47 +366,51 @@ The sync protocol must support:
 
 ### 7.1 Timer
 
-* Start/Stop toggle
-* Creates or updates a log in local DB
-* Persists active state in `metadata`
-* Enqueues outbox ops for server sync
-* While active, the timer log cannot be edited until stopped
+- Start/Stop toggle
+- Creates or updates a log in local DB
+- Persists active state in `metadata`
+- Enqueues outbox ops for server sync
+- While active, the timer log cannot be edited until stopped
 
 ### 7.2 Log Management
 
-* List logs (local)
-* Manual create log
-* Edit existing log (start/end/note)
-* Delete log (tombstone)
-* Manual entry requires both start and end times (except when explicitly creating a running timer with a manual start time)
-* No trash view
+- List logs (local)
+- Manual create log
+- Edit existing log (start/end/note)
+- Delete log (tombstone)
+- Manual entry requires both start and end times (except when explicitly creating a running timer with a manual start time)
+- No trash view
 
 ### 7.3 Stats
 
-* Total hours:
+- Total hours:
 
-  * Current calendar year
-  * All time
-* Progress bar toward yearly goal (configurable per year, set by the user at the start of the year)
+  - Current calendar year
+  - All time
+
+- Progress bar toward yearly goal (configurable per year, set by the user at the start of the year)
 
 ---
 
 ## 8. AI Coding Guidelines (Hard rules)
 
-* **No Next.js** patterns. Use TanStack Router file-based routing.
-* **Offline-first always:** UI reads from Dexie; network is replication only.
-* **No direct server writes from UI** without also writing local + enqueueing sync op.
-* **Tailwind only** for styling. Do not add component libraries unless:
+- **No Next.js** patterns. Use TanStack Router file-based routing.
+- **Offline-first always:** UI reads from Dexie; network is replication only.
+- **No direct server writes from UI** without also writing local + enqueueing sync op.
+- **Tailwind only** for styling. Do not add component libraries unless:
 
-  * Needed for accessibility primitives (Radix UI allowed).
-* Visual tone: delightful and calm; avoid whimsical/silly or brutalist aesthetics.
-* Maintain `ARCHITECT.md` as an ongoing journal of decisions and context that must survive across sessions/slices.
-* GitHub operations may use `git` and `gh` CLI tools when needed.
-* Prefer small, testable modules:
+  - Needed for accessibility primitives (Radix UI allowed).
 
-  * `db/` for Dexie schema + repository functions
-  * `hooks/` for `useTimer`, `useSync`
-  * `api/` for backend routes and models
+- Visual tone: delightful and calm; avoid whimsical/silly or brutalist aesthetics.
+- Maintain `ARCHITECT.md` as an ongoing journal of decisions and context that must survive across sessions/slices.
+- GitHub operations may use `git` and `gh` CLI tools when needed.
+- Prefer small, testable modules:
+
+  - `db/` for Dexie schema + repository functions
+  - `hooks/` for `useTimer`, `useSync`
+  - `api/` for backend routes and models
+
+- **Be proactive with executions:** if the user requests a tool install or command run (e.g., installing or running pre-commit), execute it without asking for confirmation. Use best judgment on safety/permissions, but default to action.
 
 ---
 
@@ -402,11 +440,11 @@ The sync protocol must support:
 
 Before implementing sync end-to-end:
 
-* [ ] Dexie schema includes `logs`, `sync_queue`, `metadata`
-* [ ] `device_id` is generated once and persisted
-* [ ] All mutations are atomic: update local + enqueue op
-* [ ] `/sync/push` is idempotent by `(device_id, op_id)`
-* [ ] Deletes are tombstoned and pulled back correctly
-* [ ] Pull uses cursor and supports pagination
-* [ ] Contract tests exist for push/pull shapes
-* [ ] Strict TDD followed for each feature
+- [ ] Dexie schema includes `logs`, `sync_queue`, `metadata`
+- [ ] `device_id` is generated once and persisted
+- [ ] All mutations are atomic: update local + enqueue op
+- [ ] `/sync/push` is idempotent by `(device_id, op_id)`
+- [ ] Deletes are tombstoned and pulled back correctly
+- [ ] Pull uses cursor and supports pagination
+- [ ] Contract tests exist for push/pull shapes
+- [ ] Strict TDD followed for each feature
