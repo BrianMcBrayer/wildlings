@@ -112,6 +112,7 @@ Agents are **forbidden** from submitting implementation code without correspondi
    - Backend: `api/tests/`
 2. **Green:** Implement the minimum logic to pass the test.
 3. **Refactor:** Improve structure, type-safety, and readability without changing behavior.
+4. **Always run tests twice:** once before changes to capture the failing state (Red), and again after changes to confirm Green.
 
 ### 4.1 Required checks before PR / submission
 Frontend:
