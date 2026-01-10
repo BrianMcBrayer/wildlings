@@ -37,20 +37,19 @@ describe('TimerControls', () => {
 
     const { container } = render(<TimerControls db={db} now={now} />);
 
-    expect(await screen.findByText('Ready for adventure?')).toBeTruthy();
+    expect(await screen.findByText('Ready for your next adventure?')).toBeTruthy();
     expect(screen.getByText('00:00:00')).toBeTruthy();
     const section = container.querySelector('section');
-    expect(section?.className).toContain('bg-white');
     expect(section?.className).toContain('animate-fade-in');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Start Adventure' }));
+    fireEvent.click(screen.getByRole('button', { name: /Start Adventure/i }));
 
-    expect(await screen.findByText('Currently Active')).toBeTruthy();
+    expect(await screen.findByText('Active Session')).toBeTruthy();
 
     currentNow = makeTimestamp('09:00:00');
-    fireEvent.click(screen.getByRole('button', { name: 'Finish Adventure' }));
+    fireEvent.click(screen.getByRole('button', { name: /Finish Adventure/i }));
 
-    expect(await screen.findByText('Ready for adventure?')).toBeTruthy();
+    expect(await screen.findByText('Ready for your next adventure?')).toBeTruthy();
 
     const storedLogs = await db.logs.toArray();
     expect(storedLogs).toHaveLength(1);
@@ -62,12 +61,12 @@ describe('TimerControls', () => {
 
     render(<TimerControls db={db} now={now} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Start Adventure' }));
-    expect(await screen.findByText('Currently Active')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /Start Adventure/i }));
+    expect(await screen.findByText('Active Session')).toBeTruthy();
 
     expect(screen.queryByLabelText('Started at')).toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Adjust start time' }));
+    fireEvent.click(screen.getByRole('button', { name: /Adjust start time/i }));
 
     expect(await screen.findByLabelText('Started at')).toBeTruthy();
   });
@@ -80,14 +79,14 @@ describe('TimerControls', () => {
 
     render(<TimerControls db={db} now={now} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Start Adventure' }));
-    expect(await screen.findByText('Currently Active')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /Start Adventure/i }));
+    expect(await screen.findByText('Active Session')).toBeTruthy();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Adjust start time' }));
+    fireEvent.click(screen.getByRole('button', { name: /Adjust start time/i }));
     fireEvent.change(await screen.findByLabelText('Started at'), {
       target: { value: '2026-01-01T07:30' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Update' }));
 
     await waitFor(async () => {
       const storedLogs = await db.logs.toArray();

@@ -19,51 +19,57 @@ export const StatsSummary = ({ db, year }: StatsSummaryProps) => {
   const allTimeHoursLabel = formatDurationHours(allTimeHours);
 
   return (
-    <div className="grid gap-4 sm:grid-cols-[1.4fr_0.6fr]">
-      <div className="relative overflow-hidden rounded-3xl bg-white p-6 shadow-sm ring-1 ring-wild-sand">
-        <div className="flex flex-wrap items-center gap-6">
-          <div className="relative flex h-28 w-28 items-center justify-center rounded-full bg-wild-sand/30">
-            <span className="font-serif text-2xl text-wild-moss">{progressPercent}%</span>
-            <svg
-              className="absolute h-full w-full -rotate-90 text-wild-sand"
-              viewBox="0 0 36 36"
-              aria-hidden="true"
-            >
-              <path
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+    <div className="flex flex-col gap-6">
+      <div className="relative overflow-hidden rounded-[2rem] bg-white p-8 shadow-xl shadow-wild-sand/20 ring-1 ring-wild-sand transition-all hover:shadow-2xl hover:shadow-wild-sand/40">
+        <div className="flex flex-col items-center justify-center text-center">
+          <div className="relative mb-6 flex h-48 w-48 items-center justify-center">
+            {/* Background Circle */}
+            <svg className="absolute h-full w-full -rotate-90" viewBox="0 0 100 100">
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
                 fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
+                stroke="#E6E2D6"
+                strokeWidth="8"
+                strokeLinecap="round"
               />
-              <path
-                className="text-wild-moss"
-                strokeDasharray={`${progressPercent}, 100`}
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              {/* Progress Circle */}
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
                 fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
+                stroke={yearHours > 0 ? '#2B4B3F' : 'transparent'}
+                strokeWidth="8"
+                strokeDasharray={`${progressPercent * 2.83}, 283`}
+                strokeLinecap="round"
+                className="transition-all duration-1000 ease-out"
               />
             </svg>
+
+            <div className="flex flex-col items-center">
+              <span className="font-serif text-5xl font-bold text-wild-moss">
+                {progressPercent}%
+              </span>
+              <span className="text-xs font-bold uppercase tracking-widest text-wild-stone/60">
+                Of Goal
+              </span>
+            </div>
           </div>
-          <div className="flex-1">
-            <p className="text-sm text-wild-stone">
-              {`You've spent ${yearHoursLabel} outside this year.`}
-            </p>
-            <p className="mt-3 font-serif text-4xl text-wild-bark">{yearHoursLabel}</p>
-            <p className="mt-2 text-xs uppercase tracking-[0.3em] text-wild-stone">
-              Current year total
+
+          <div className="space-y-1">
+            <h3 className="font-serif text-3xl font-medium text-wild-bark">{yearHoursLabel}</h3>
+            <p className="text-sm font-medium text-wild-stone">Time spent outside this year</p>
+          </div>
+
+          <div className="mt-6 flex items-center justify-center gap-2 rounded-full bg-wild-paper px-4 py-2">
+            <div className="h-1.5 w-1.5 rounded-full bg-wild-clay" />
+            <p className="text-xs font-bold uppercase tracking-widest text-wild-stone">
+              {yearlyGoalHours ? `Goal: ${yearlyGoalHours}h` : 'No goal set'}
             </p>
           </div>
         </div>
-        <p className="mt-4 text-xs text-wild-stone">
-          {yearlyGoalHours ? `Goal: ${yearlyGoalHours}h` : 'No goal set'}
-        </p>
-      </div>
-
-      <div className="flex flex-col justify-center rounded-3xl bg-wild-sand/70 p-6 shadow-sm ring-1 ring-wild-sand/70">
-        <p className="text-xs font-bold uppercase tracking-wider text-wild-bark/60">Lifetime</p>
-        <p className="mt-2 font-serif text-3xl text-wild-bark">{allTimeHoursLabel}</p>
-        <p className="mt-2 text-xs text-wild-bark/60">Total time outdoors</p>
       </div>
     </div>
   );

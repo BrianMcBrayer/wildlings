@@ -11,7 +11,7 @@ function HomeRoute() {
   const { db } = Route.useRouteContext();
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+    <div className="grid gap-8 lg:grid-cols-2 items-start">
       <TimerControls db={db} />
       <StatsSummary db={db} />
     </div>

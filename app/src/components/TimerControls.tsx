@@ -90,105 +90,118 @@ export const TimerControls = ({ db, now }: TimerControlsProps) => {
   };
 
   return (
-    <section
-      className={`animate-fade-in relative overflow-hidden rounded-[2rem] p-8 shadow-xl transition-all duration-500 ${
-        isActive
-          ? 'bg-wild-moss text-wild-paper ring-4 ring-wild-fern/30'
-          : 'bg-white text-wild-bark ring-1 ring-wild-sand'
-      }`}
-    >
-      {isActive ? (
-        <div className="absolute -right-12 -top-12 h-64 w-64 rounded-full bg-wild-fern/20 blur-3xl animate-pulse-slow" />
-      ) : null}
+    <section className="relative flex flex-col items-center justify-center py-8 text-center animate-fade-in">
+      {/* Background decorations */}
+      <div className="absolute left-1/2 top-1/2 -z-10 h-full w-full -translate-x-1/2 -translate-y-1/2 overflow-hidden opacity-40 mix-blend-multiply">
+        <div className="absolute left-1/4 top-0 h-64 w-64 rounded-full bg-wild-sand/50 blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 h-64 w-64 rounded-full bg-wild-fern/10 blur-3xl" />
+      </div>
 
-      <header className="relative z-10 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {isActive ? <div className="h-2 w-2 rounded-full bg-red-400 animate-ping" /> : null}
-          <p
-            className={`text-xs font-bold uppercase tracking-[0.2em] ${
-              isActive ? 'text-wild-sand/60' : 'text-wild-stone'
-            }`}
-          >
-            {isActive ? 'Currently Active' : 'Timer'}
-          </p>
+      <header className="mb-8 flex flex-col items-center gap-2">
+        <div
+          className={`flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest transition-colors ${
+            isActive ? 'bg-red-100 text-red-600' : 'bg-wild-sand/50 text-wild-stone'
+          }`}
+        >
+          {isActive ? (
+            <>
+              <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+              <span>Active Session</span>
+            </>
+          ) : (
+            <span>Timer Ready</span>
+          )}
         </div>
       </header>
 
-      <div className="relative z-10 mt-8 flex flex-col items-center justify-center text-center">
-        <div className="relative flex items-center gap-3">
-          {isActive ? (
-            <div className="absolute -inset-6 rounded-full bg-wild-fern/30 blur-2xl animate-pulse-slow" />
-          ) : null}
-          <div className="relative font-serif text-[4rem] font-light leading-none tracking-tight tabular-nums">
-            {elapsed}
-          </div>
-          {isActive ? (
-            <button
-              type="button"
-              aria-label="Adjust start time"
-              onClick={() => setIsEditing((prev) => !prev)}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full bg-wild-paper/15 text-wild-paper transition-colors hover:bg-wild-paper/25"
-            >
-              <Edit2 className="h-4 w-4" />
-            </button>
-          ) : null}
+      {/* Main Timer Display */}
+      <div className="relative mb-10">
+        <div className="relative z-10 font-serif text-[5.5rem] font-medium leading-none tracking-tight text-wild-bark tabular-nums sm:text-[7rem]">
+          {elapsed}
         </div>
-        <p className={`mt-2 text-sm ${isActive ? 'text-wild-sand/80' : 'text-wild-stone'}`}>
-          {isActive ? 'Time in the wild' : 'Ready for adventure?'}
+
+        {isActive && (
+          <button
+            type="button"
+            aria-label="Adjust start time"
+            onClick={() => setIsEditing((prev) => !prev)}
+            className="absolute -right-6 top-1/2 -translate-y-1/2 translate-x-full rounded-full bg-wild-sand/50 p-2 text-wild-stone transition-colors hover:bg-wild-sand hover:text-wild-bark sm:right-0 sm:translate-x-12"
+          >
+            <Edit2 className="h-5 w-5" />
+          </button>
+        )}
+
+        <p className="mt-2 font-medium text-wild-stone/80">
+          {isActive ? 'Time in the wild' : 'Ready for your next adventure?'}
         </p>
       </div>
 
-      <div className="relative z-10 mt-10">
+      {/* Action Button */}
+      <div className="w-full max-w-md">
         {!isActive ? (
           <button
             type="button"
             onClick={handleStart}
-            className="group relative flex w-full items-center justify-center gap-3 rounded-2xl bg-wild-moss py-5 text-lg font-semibold text-white shadow-lg shadow-wild-moss/30 transition-all hover:scale-[1.02] active:scale-95"
+            className="group relative flex w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-[2.5rem] bg-wild-moss px-8 py-10 text-wild-paper shadow-xl shadow-wild-moss/20 transition-all duration-300 hover:scale-[1.02] hover:bg-wild-moss/90 hover:shadow-2xl hover:shadow-wild-moss/30 active:scale-95 active:duration-100"
           >
-            <Play className="h-6 w-6 fill-current" />
-            <span>Start Adventure</span>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+            <Play className="h-12 w-12 fill-current transition-transform group-hover:scale-110" />
+            <span className="text-2xl font-bold tracking-wide">Start Adventure</span>
+            <span className="text-sm font-medium text-wild-paper/70">Click to begin tracking</span>
           </button>
         ) : (
           <button
             type="button"
             onClick={handleStop}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-wild-clay py-4 font-semibold text-white shadow-lg shadow-wild-clay/30 transition-all active:scale-95"
+            className="group relative flex w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-[2.5rem] bg-wild-clay px-8 py-10 text-white shadow-xl shadow-wild-clay/20 transition-all duration-300 hover:scale-[1.02] hover:bg-wild-clay/90 hover:shadow-2xl hover:shadow-wild-clay/30 active:scale-95 active:duration-100"
           >
-            <Square className="h-5 w-5 fill-current" />
-            <span>Finish Adventure</span>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+            <Square className="h-10 w-10 fill-current" />
+            <span className="text-2xl font-bold tracking-wide">Finish Adventure</span>
+            <span className="text-sm font-medium text-white/70">Save this session</span>
           </button>
         )}
       </div>
 
       {error ? (
-        <p className="relative z-10 mt-4 text-sm text-wild-clay" role="alert">
+        <div className="mt-6 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-600 animate-slide-up">
           {error}
-        </p>
+        </div>
       ) : null}
 
+      {/* Editing Start Time Modal/Popover */}
       {isActive && isEditing ? (
-        <div className="relative z-10 mt-6 rounded-xl bg-black/20 p-4 backdrop-blur-sm animate-slide-up">
-          <label
-            htmlFor="adjust-start-at"
-            className="text-xs uppercase tracking-wide text-wild-sand/60"
-          >
-            Started at
-          </label>
-          <div className="mt-2 flex gap-2">
+        <div className="relative mt-8 w-full max-w-sm overflow-hidden rounded-2xl bg-white p-6 shadow-xl ring-1 ring-wild-sand animate-slide-up">
+          <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-wild-stone">
+            Edit Start Time
+          </h3>
+          <div className="flex flex-col gap-3">
+            <label htmlFor="adjust-start-at" className="sr-only">
+              Started at
+            </label>
             <input
               id="adjust-start-at"
               type="datetime-local"
               value={adjustStartAt}
               onChange={(event) => setAdjustStartAt(event.target.value)}
-              className="w-full rounded-lg border border-transparent bg-wild-paper/10 px-3 py-2 text-sm text-wild-paper focus:ring-1 focus:ring-wild-sand"
+              className="w-full rounded-xl border-none bg-wild-paper px-4 py-3 text-wild-bark ring-1 ring-wild-sand focus:ring-2 focus:ring-wild-moss"
             />
-            <button
-              type="button"
-              onClick={handleAdjustStart}
-              className="rounded-lg bg-wild-paper px-4 text-xs font-bold text-wild-moss"
-            >
-              Save
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="flex-1 rounded-xl bg-wild-paper py-3 text-sm font-bold text-wild-stone hover:bg-wild-sand"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleAdjustStart}
+                className="flex-1 rounded-xl bg-wild-moss py-3 text-sm font-bold text-wild-paper hover:bg-wild-moss/90"
+              >
+                Update
+              </button>
+            </div>
           </div>
         </div>
       ) : null}
