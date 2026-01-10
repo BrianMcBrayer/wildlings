@@ -42,26 +42,19 @@ describe('StatsSummary', () => {
     ]);
     await setYearlyGoal(db, { year: 2026, hours: 4 });
 
-    const { container } = render(<StatsSummary db={db} year={2026} />);
+    render(<StatsSummary db={db} year={2026} />);
 
-    expect(await screen.findByText('Goal 4h')).toBeTruthy();
-
-    expect(screen.getByText('Year 2026')).toBeTruthy();
-    expect(screen.getByText('Your Outdoor Journal')).toBeTruthy();
-    expect(screen.getByText('Year hours')).toBeTruthy();
-    expect(screen.getByText('All time')).toBeTruthy();
+    expect(await screen.findByText('Goal: 4h')).toBeTruthy();
+    expect(screen.getByText('Current Year')).toBeTruthy();
+    expect(screen.getByText('Lifetime')).toBeTruthy();
     expect(screen.getAllByText('2h 0m')).toHaveLength(2);
     expect(screen.getByText('50%')).toBeTruthy();
-
-    const section = container.querySelector('section');
-    expect(section?.className).toContain('bg-wild-paper');
-    expect(section?.className).toContain('animate-fade-in');
   });
 
   it('renders a no-goal message when the year has no configured goal', async () => {
     render(<StatsSummary db={db} year={2026} />);
 
-    expect(await screen.findByText('Set a goal to map your year in the wild.')).toBeTruthy();
-    expect(screen.getByText('Year 2026')).toBeTruthy();
+    expect(await screen.findByText('No goal set')).toBeTruthy();
+    expect(screen.getByText('Current Year')).toBeTruthy();
   });
 });

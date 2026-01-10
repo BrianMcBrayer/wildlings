@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, Outlet, createRootRouteWithContext } from '@tanstack/react-router';
+import { Home, NotebookPen, Settings } from 'lucide-react';
 import type { WildlingsDb } from '../db/db';
 import { SyncStatus } from '../components/SyncStatus';
 
@@ -7,91 +8,62 @@ export const Route = createRootRouteWithContext<{ db: WildlingsDb }>()({
   component: RootLayout,
 });
 
-const navStyles = {
-  base: 'rounded-full px-3 py-2 text-sm font-semibold transition',
-  active: 'bg-wild-moss text-white',
-  inactive: 'text-wild-stone hover:text-wild-bark',
-};
-
 function RootLayout() {
   const { db } = Route.useRouteContext();
+  const navItemClass =
+    'flex flex-col items-center justify-center gap-1 p-2 text-xs font-medium transition-colors';
+  const navItemInactive = 'text-wild-stone hover:text-wild-bark';
+  const navItemActive = 'text-wild-moss';
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,#ffffff_0%,#f7f5ee_45%,#efe9dd_100%)] text-wild-bark">
-      <div className="mx-auto w-full max-w-5xl px-4 sm:px-6" data-testid="app-layout">
-        <header className="flex w-full flex-col gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
-          <div
-            className="flex items-center justify-center gap-3 sm:justify-center"
-            data-testid="wildlings-header"
-          >
-            <img src="/favicon.svg" alt="Wildlings" className="h-10 w-10" />
-            <div className="text-center sm:text-left">
-              <p className="text-xs uppercase tracking-[0.4em] text-wild-stone">Wildlings</p>
-              <h1 className="text-2xl font-semibold text-wild-bark">Outside time, counted.</h1>
+    <div className="min-h-screen bg-wild-paper pb-24 text-wild-bark sm:pb-0">
+      <div className="mx-auto w-full max-w-2xl px-4 sm:px-6" data-testid="app-layout">
+        <header className="flex items-center justify-between py-8" data-testid="wildlings-header">
+          <div className="flex items-center gap-3">
+            <img src="/favicon.svg" alt="Wildlings" className="h-12 w-12 rounded-xl shadow-sm" />
+            <div>
+              <h1 className="font-serif text-2xl font-bold text-wild-moss">Wildlings</h1>
+              <p className="text-xs uppercase tracking-wider text-wild-stone">Outdoor Journal</p>
             </div>
           </div>
-          <div className="hidden flex-wrap items-center gap-3 sm:flex">
+          <div className="hidden sm:block">
             <SyncStatus db={db} />
-            <nav className="flex items-center gap-2 rounded-full bg-white/80 p-2 shadow-sm ring-1 ring-wild-sand/70">
-              <Link
-                to="/"
-                className={`${navStyles.base} ${navStyles.inactive}`}
-                activeOptions={{ exact: true }}
-                activeProps={{ className: `${navStyles.base} ${navStyles.active}` }}
-              >
-                Home
-              </Link>
-              <Link
-                to="/logs"
-                className={`${navStyles.base} ${navStyles.inactive}`}
-                activeProps={{ className: `${navStyles.base} ${navStyles.active}` }}
-              >
-                Logs
-              </Link>
-              <Link
-                to="/settings"
-                className={`${navStyles.base} ${navStyles.inactive}`}
-                activeProps={{ className: `${navStyles.base} ${navStyles.active}` }}
-              >
-                Settings
-              </Link>
-            </nav>
           </div>
         </header>
 
-        <main className="w-full pb-24 sm:pb-16">
+        <main className="animate-fade-in space-y-6">
           <Outlet />
         </main>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-10 border-t border-wild-sand/70 bg-white/80 backdrop-blur-md sm:hidden">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <SyncStatus db={db} />
-          <nav className="flex items-center gap-2 rounded-full bg-wild-paper/80 p-1 shadow-sm ring-1 ring-wild-sand/70">
-            <Link
-              to="/"
-              className={`${navStyles.base} ${navStyles.inactive}`}
-              activeOptions={{ exact: true }}
-              activeProps={{ className: `${navStyles.base} ${navStyles.active}` }}
-            >
-              Home
-            </Link>
-            <Link
-              to="/logs"
-              className={`${navStyles.base} ${navStyles.inactive}`}
-              activeProps={{ className: `${navStyles.base} ${navStyles.active}` }}
-            >
-              Logs
-            </Link>
-            <Link
-              to="/settings"
-              className={`${navStyles.base} ${navStyles.inactive}`}
-              activeProps={{ className: `${navStyles.base} ${navStyles.active}` }}
-            >
-              Settings
-            </Link>
-          </nav>
-        </div>
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-wild-sand/50 bg-white/90 px-6 py-2 backdrop-blur-lg sm:hidden">
+        <nav className="flex items-center justify-around">
+          <Link
+            to="/"
+            className={`${navItemClass} ${navItemInactive}`}
+            activeOptions={{ exact: true }}
+            activeProps={{ className: `${navItemClass} ${navItemActive}` }}
+          >
+            <Home className="h-6 w-6" />
+            <span>Home</span>
+          </Link>
+          <Link
+            to="/logs"
+            className={`${navItemClass} ${navItemInactive}`}
+            activeProps={{ className: `${navItemClass} ${navItemActive}` }}
+          >
+            <NotebookPen className="h-6 w-6" />
+            <span>Logs</span>
+          </Link>
+          <Link
+            to="/settings"
+            className={`${navItemClass} ${navItemInactive}`}
+            activeProps={{ className: `${navItemClass} ${navItemActive}` }}
+          >
+            <Settings className="h-6 w-6" />
+            <span>Config</span>
+          </Link>
+        </nav>
       </div>
     </div>
   );

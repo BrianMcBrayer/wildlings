@@ -9,71 +9,67 @@ type StatsSummaryProps = {
 };
 
 export const StatsSummary = ({ db, year }: StatsSummaryProps) => {
-  const {
-    year: resolvedYear,
-    yearHours,
-    allTimeHours,
-    yearlyGoalHours,
-  } = useStats(db, {
-    year,
-  });
+  const { yearHours, allTimeHours, yearlyGoalHours } = useStats(db, { year });
 
   const progressPercent =
     yearlyGoalHours && yearlyGoalHours > 0
       ? Math.min(100, Math.round((yearHours / yearlyGoalHours) * 100))
-      : null;
-
-  const progressMessage = (() => {
-    if (!yearlyGoalHours || yearlyGoalHours <= 0) {
-      return 'Set a goal to map your year in the wild.';
-    }
-    if ((progressPercent ?? 0) <= 0) {
-      return 'Every journey begins with a single step.';
-    }
-    if ((progressPercent ?? 0) < 50) {
-      return 'Steady pacing builds lasting trails.';
-    }
-    if ((progressPercent ?? 0) < 100) {
-      return 'You are deep in the wild now.';
-    }
-    return 'Goal met. Keep wandering.';
-  })();
+      : 0;
 
   return (
-    <section className="animate-fade-in rounded-3xl bg-wild-paper p-6 shadow-sm ring-1 ring-wild-sand">
-      <header className="mb-6">
-        <p className="text-xs uppercase tracking-[0.3em] text-wild-stone">Year {resolvedYear}</p>
-        <h2 className="text-2xl font-semibold text-wild-bark">Your Outdoor Journal</h2>
-      </header>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-2xl bg-white/80 p-5 shadow-sm ring-1 ring-wild-sand/70">
-          <p className="text-xs uppercase tracking-wide text-wild-stone">Year hours</p>
-          <p className="mt-2 text-6xl font-serif text-wild-moss">
-            {formatDurationHours(yearHours)}
-          </p>
+    <div className="grid gap-4 sm:grid-cols-2">
+      <div className="relative overflow-hidden rounded-3xl bg-white p-6 shadow-sm ring-1 ring-wild-sand">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-wild-stone">
+              Current Year
+            </p>
+            <p className="mt-1 font-serif text-3xl text-wild-bark">
+              {formatDurationHours(yearHours)}
+            </p>
+          </div>
+          <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-wild-sand/30">
+            <span className="text-xs font-bold text-wild-moss">{progressPercent}%</span>
+            <svg
+              className="absolute h-full w-full -rotate-90 text-wild-sand"
+              viewBox="0 0 36 36"
+              aria-hidden="true"
+            >
+              <path
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="text-wild-moss"
+                strokeDasharray={`${progressPercent}, 100`}
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+            </svg>
+          </div>
         </div>
-        <div className="rounded-2xl bg-white/80 p-5 shadow-sm ring-1 ring-wild-sand/70">
-          <p className="text-xs uppercase tracking-wide text-wild-stone">All time</p>
-          <p className="mt-3 text-3xl font-semibold text-wild-bark">
-            {formatDurationHours(allTimeHours)}
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-6 space-y-3">
-        <div className="flex items-center justify-between text-sm text-wild-stone">
-          <span>{yearlyGoalHours ? `Goal ${yearlyGoalHours}h` : 'No goal set'}</span>
-          <span>{progressPercent ?? 0}%</span>
-        </div>
-        <div className="h-4 overflow-hidden rounded-full bg-wild-sand">
+        <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-wild-paper">
           <div
-            className="h-full rounded-full bg-[linear-gradient(135deg,#4A7A6A_25%,#5f8e7e_25%,#5f8e7e_50%,#4A7A6A_50%,#4A7A6A_75%,#5f8e7e_75%,#5f8e7e_100%)] bg-[length:16px_16px]"
-            style={{ width: `${progressPercent ?? 0}%` }}
+            style={{ width: `${progressPercent}%` }}
+            className="h-full rounded-full bg-wild-moss transition-all duration-1000"
           />
         </div>
-        <p className="text-sm text-wild-stone">{progressMessage}</p>
+        <p className="mt-2 text-xs text-wild-stone">
+          {yearlyGoalHours ? `Goal: ${yearlyGoalHours}h` : 'No goal set'}
+        </p>
       </div>
-    </section>
+
+      <div className="flex flex-col justify-center rounded-3xl bg-[#E6E2D6] p-6 shadow-sm">
+        <p className="text-xs font-bold uppercase tracking-wider text-wild-bark/60">Lifetime</p>
+        <p className="mt-1 font-serif text-3xl text-wild-bark">
+          {formatDurationHours(allTimeHours)}
+        </p>
+        <p className="mt-2 text-xs text-wild-bark/60">Total time outdoors</p>
+      </div>
+    </div>
   );
 };

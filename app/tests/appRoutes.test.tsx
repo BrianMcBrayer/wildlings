@@ -32,10 +32,10 @@ describe('app routes', () => {
 
     const { container } = render(<RouterProvider router={router} />);
 
-    expect(await screen.findByText('Timer')).toBeTruthy();
-    expect(await screen.findByText('Your Outdoor Journal')).toBeTruthy();
+    expect(await screen.findByText('Ready for adventure?')).toBeTruthy();
+    expect(await screen.findByText('Current Year')).toBeTruthy();
     const logoBlock = container.querySelector('[data-testid="wildlings-header"]');
-    expect(logoBlock?.className).toContain('sm:justify-center');
+    expect(logoBlock?.className).toContain('flex');
     expect(container.querySelector('[data-testid="app-layout"]')).toBeTruthy();
   });
 

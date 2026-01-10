@@ -40,16 +40,15 @@ describe('TimerControls', () => {
     expect(await screen.findByText('Ready for adventure?')).toBeTruthy();
     expect(screen.getByText('00:00:00')).toBeTruthy();
     const section = container.querySelector('section');
-    expect(section?.className).toContain('bg-wild-paper');
+    expect(section?.className).toContain('bg-white');
     expect(section?.className).toContain('animate-fade-in');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Start timer' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Start Adventure' }));
 
-    expect(await screen.findByText('Timer running')).toBeTruthy();
-    expect(screen.getByText('Started at Jan 1, 8:00 AM')).toBeTruthy();
+    expect(await screen.findByText('Currently Active')).toBeTruthy();
 
     currentNow = makeTimestamp('09:00:00');
-    fireEvent.click(screen.getByRole('button', { name: 'Stop timer' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Finish' }));
 
     expect(await screen.findByText('Ready for adventure?')).toBeTruthy();
 
@@ -58,27 +57,19 @@ describe('TimerControls', () => {
     expect(storedLogs[0].end_at).toBe(makeTimestamp('09:00:00'));
   });
 
-  it('shows a brief success message after stopping', async () => {
-    const now = vi
-      .fn()
-      .mockReturnValueOnce(makeTimestamp('10:00:00'))
-      .mockReturnValueOnce(makeTimestamp('10:30:00'));
+  it('reveals edit controls only after toggling edit mode', async () => {
+    const now = vi.fn().mockReturnValueOnce(makeTimestamp('10:00:00'));
 
     render(<TimerControls db={db} now={now} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Start timer' }));
-    expect(await screen.findByText('Timer running')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Start Adventure' }));
+    expect(await screen.findByText('Currently Active')).toBeTruthy();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Stop timer' }));
+    expect(screen.queryByLabelText('Started at')).toBeNull();
 
-    expect(await screen.findByText('Timer stopped. Nice work.')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Adjust start time' }));
 
-    await waitFor(
-      () => {
-        expect(screen.queryByText('Timer stopped. Nice work.')).toBeNull();
-      },
-      { timeout: 3000 },
-    );
+    expect(await screen.findByLabelText('Started at')).toBeTruthy();
   });
 
   it('allows adjusting the start time while the timer is active', async () => {
@@ -89,20 +80,21 @@ describe('TimerControls', () => {
 
     render(<TimerControls db={db} now={now} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Start timer' }));
-    expect(await screen.findByText('Timer running')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Start Adventure' }));
+    expect(await screen.findByText('Currently Active')).toBeTruthy();
 
-    fireEvent.change(screen.getByLabelText('Adjust start time'), {
+    fireEvent.click(screen.getByRole('button', { name: 'Adjust start time' }));
+    fireEvent.change(await screen.findByLabelText('Started at'), {
       target: { value: '2026-01-01T07:30' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Update start time' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-    expect(await screen.findByText('Started at Jan 1, 7:30 AM')).toBeTruthy();
+    await waitFor(async () => {
+      const storedLogs = await db.logs.toArray();
+      expect(storedLogs[0].start_at).toBe('2026-01-01T07:30:00.000Z');
 
-    const storedLogs = await db.logs.toArray();
-    expect(storedLogs[0].start_at).toBe('2026-01-01T07:30:00.000Z');
-
-    const metadata = await getMetadata(db);
-    expect(metadata.active_start_at).toBe('2026-01-01T07:30:00.000Z');
+      const metadata = await getMetadata(db);
+      expect(metadata.active_start_at).toBe('2026-01-01T07:30:00.000Z');
+    });
   });
 });
