@@ -1,80 +1,26 @@
 name: Docker
 
 on:
-  push:
-    branches:
-      - master
-  release:
+  workflow_run:
+    workflows:
+      - CI
     types:
-      - published
+      - completed
 
 permissions:
   contents: read
   packages: write
 
 jobs:
-  frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: app/package-lock.json
-      - name: Install dependencies
-        run: npm ci --prefix app
-      - name: Run tests
-        run: npm test --prefix app
-      - name: Typecheck
-        run: npm run typecheck --prefix app
-
-  backend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - uses: astral-sh/setup-uv@v3
-      - name: Install dependencies
-        run: uv sync --project api
-      - name: Run tests
-        run: uv run --project api pytest
-
-  build-and-push-commit:
-    runs-on: ubuntu-latest
-    needs:
-      - frontend
-      - backend
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    steps:
-      - uses: actions/checkout@v4
-      - name: Read commit
-        id: commit
-        run: |
-          echo "value=${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push (commit)
-        run: |
-          repo="${GITHUB_REPOSITORY,,}"
-          docker buildx build --push \
-            -t ghcr.io/${repo}:sha-${{ steps.commit.outputs.value }} \
-            .
-
   build-and-push-release:
     runs-on: ubuntu-latest
-    needs:
-      - frontend
-      - backend
-    if: github.event_name == 'release' && github.event.action == 'published'
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'release'
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with:
@@ -83,8 +29,13 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push (release)
         run: |
+          tag="${{ github.event.workflow_run.head_branch }}"
+          if [ -z "$tag" ]; then
+            echo "Release tag is missing from workflow_run payload."
+            exit 1
+          fi
           repo="${GITHUB_REPOSITORY,,}"
           docker buildx build --push \
-            -t ghcr.io/${repo}:${{ github.event.release.tag_name }} \
+            -t ghcr.io/${repo}:${tag} \
             -t ghcr.io/${repo}:latest \
             .

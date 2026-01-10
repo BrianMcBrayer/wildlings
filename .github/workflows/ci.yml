@@ -17,7 +17,6 @@ permissions:
 
 jobs:
   frontend:
-    if: ${{ hashFiles('app/package.json') != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,7 +33,6 @@ jobs:
         run: npm run typecheck --prefix app
 
   backend:
-    if: ${{ hashFiles('api/pyproject.toml') != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
