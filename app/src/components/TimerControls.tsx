@@ -137,18 +137,22 @@ export const TimerControls = ({ db, now }: TimerControlsProps) => {
       </div>
 
       {/* Action Button */}
+
       <div className="flex w-full justify-center">
         {!isActive ? (
           <button
             type="button"
             onClick={handleStart}
-            className="group relative flex h-64 w-64 flex-col items-center justify-center gap-4 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-wild-paper shadow-[0_10px_20px_rgba(16,185,129,0.3),0_6px_6px_rgba(0,0,0,0.1),inset_0_-4px_4px_rgba(0,0,0,0.1)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_15px_25px_rgba(16,185,129,0.4),0_8px_8px_rgba(0,0,0,0.1),inset_0_-4px_4px_rgba(0,0,0,0.1)] active:scale-95 active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.2)]"
+            className="group relative flex h-72 w-72 aspect-square flex-col items-center justify-center gap-5 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-wild-paper shadow-[0_10px_30px_rgba(16,185,129,0.3),0_6px_10px_rgba(0,0,0,0.1),inset_0_-4px_6px_rgba(0,0,0,0.15)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(16,185,129,0.4),0_10px_10px_rgba(0,0,0,0.1),inset_0_-4px_6px_rgba(0,0,0,0.15)] active:scale-95 active:shadow-[inset_0_4px_12px_rgba(0,0,0,0.25)]"
           >
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-            <Play className="h-16 w-16 fill-current pl-2 transition-transform group-hover:scale-110" />
+
+            <Play className="h-20 w-20 fill-current pl-2 transition-transform group-hover:scale-110" />
+
             <div className="flex flex-col items-center gap-1">
-              <span className="text-xl font-bold tracking-wide uppercase">Start</span>
-              <span className="text-xs font-medium uppercase tracking-widest opacity-80">
+              <span className="text-2xl font-bold tracking-wide uppercase">Start</span>
+
+              <span className="text-sm font-bold uppercase tracking-widest opacity-80">
                 Adventure
               </span>
             </div>
@@ -157,13 +161,16 @@ export const TimerControls = ({ db, now }: TimerControlsProps) => {
           <button
             type="button"
             onClick={handleStop}
-            className="group relative flex h-64 w-64 flex-col items-center justify-center gap-4 rounded-full bg-gradient-to-br from-red-500 to-red-600 text-white shadow-[0_10px_20px_rgba(239,68,68,0.3),0_6px_6px_rgba(0,0,0,0.1),inset_0_-4px_4px_rgba(0,0,0,0.1)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_15px_25px_rgba(239,68,68,0.4),0_8px_8px_rgba(0,0,0,0.1),inset_0_-4px_4px_rgba(0,0,0,0.1)] active:scale-95 active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.2)]"
+            className="group relative flex h-72 w-72 aspect-square flex-col items-center justify-center gap-5 rounded-full bg-gradient-to-br from-red-500 to-red-600 text-white shadow-[0_10px_30px_rgba(239,68,68,0.3),0_6px_10px_rgba(0,0,0,0.1),inset_0_-4px_6px_rgba(0,0,0,0.15)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(239,68,68,0.4),0_10px_10px_rgba(0,0,0,0.1),inset_0_-4px_6px_rgba(0,0,0,0.15)] active:scale-95 active:shadow-[inset_0_4px_12px_rgba(0,0,0,0.25)]"
           >
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-            <Square className="h-14 w-14 fill-current transition-transform group-hover:scale-110" />
+
+            <Square className="h-16 w-16 fill-current transition-transform group-hover:scale-110" />
+
             <div className="flex flex-col items-center gap-1">
-              <span className="text-xl font-bold tracking-wide uppercase">Finish</span>
-              <span className="text-xs font-medium uppercase tracking-widest opacity-80">
+              <span className="text-2xl font-bold tracking-wide uppercase">Finish</span>
+
+              <span className="text-sm font-bold uppercase tracking-widest opacity-80">
                 Adventure
               </span>
             </div>

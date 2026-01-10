@@ -48,11 +48,11 @@ export const StatsSummary = ({ db, year }: StatsSummaryProps) => {
               />
             </svg>
 
-            <div className="flex flex-col items-center">
-              <span className="font-serif text-5xl font-bold text-wild-moss">
+            <div className="flex flex-col items-center gap-1">
+              <span className="font-serif text-5xl font-bold text-wild-moss leading-none">
                 {progressPercent}%
               </span>
-              <span className="mt-2 text-xs font-bold uppercase tracking-widest text-wild-stone/60">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-wild-stone/70">
                 Of Goal
               </span>
             </div>
