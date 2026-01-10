@@ -45,7 +45,7 @@ describe('StatsSummary', () => {
     render(<StatsSummary db={db} year={2026} />);
 
     expect(await screen.findByText('Goal: 4h')).toBeTruthy();
-    expect(screen.getByText('Current Year')).toBeTruthy();
+    expect(screen.getByText("You've spent 2h 0m outside this year.")).toBeTruthy();
     expect(screen.getByText('Lifetime')).toBeTruthy();
     expect(screen.getAllByText('2h 0m')).toHaveLength(2);
     expect(screen.getByText('50%')).toBeTruthy();
@@ -55,6 +55,6 @@ describe('StatsSummary', () => {
     render(<StatsSummary db={db} year={2026} />);
 
     expect(await screen.findByText('No goal set')).toBeTruthy();
-    expect(screen.getByText('Current Year')).toBeTruthy();
+    expect(screen.getByText("You've spent 0h 0m outside this year.")).toBeTruthy();
   });
 });

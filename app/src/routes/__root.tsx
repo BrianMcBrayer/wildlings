@@ -26,9 +26,7 @@ function RootLayout() {
               <p className="text-xs uppercase tracking-wider text-wild-stone">Outdoor Journal</p>
             </div>
           </div>
-          <div className="hidden sm:block">
-            <SyncStatus db={db} />
-          </div>
+          <SyncStatus db={db} />
         </header>
 
         <main className="animate-fade-in space-y-6">
@@ -36,8 +34,8 @@ function RootLayout() {
         </main>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-wild-sand/50 bg-white/90 px-6 py-2 backdrop-blur-lg sm:hidden">
-        <nav className="flex items-center justify-around">
+      <div className="fixed bottom-4 left-0 right-0 z-50 px-4 sm:hidden">
+        <nav className="mx-auto flex max-w-sm items-center justify-around rounded-2xl border border-wild-sand/70 bg-white/80 px-4 py-3 shadow-lg backdrop-blur-md">
           <Link
             to="/"
             className={`${navItemClass} ${navItemInactive}`}

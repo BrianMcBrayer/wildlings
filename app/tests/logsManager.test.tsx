@@ -97,7 +97,7 @@ describe('LogsManager', () => {
 
     render(<LogsManager db={db} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add past log' }));
 
     const startInput = screen.getByLabelText('Start time') as HTMLInputElement;
     const endInput = screen.getByLabelText('End time') as HTMLInputElement;
@@ -117,7 +117,7 @@ describe('LogsManager', () => {
 
     render(<LogsManager db={db} now={now} />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add past log' }));
 
     fireEvent.change(screen.getByLabelText('Start time'), {
       target: { value: '2026-02-01T09:00' },

@@ -48,7 +48,7 @@ describe('TimerControls', () => {
     expect(await screen.findByText('Currently Active')).toBeTruthy();
 
     currentNow = makeTimestamp('09:00:00');
-    fireEvent.click(screen.getByRole('button', { name: 'Finish' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Finish Adventure' }));
 
     expect(await screen.findByText('Ready for adventure?')).toBeTruthy();
 

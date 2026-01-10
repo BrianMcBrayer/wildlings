@@ -15,21 +15,15 @@ export const StatsSummary = ({ db, year }: StatsSummaryProps) => {
     yearlyGoalHours && yearlyGoalHours > 0
       ? Math.min(100, Math.round((yearHours / yearlyGoalHours) * 100))
       : 0;
+  const yearHoursLabel = formatDurationHours(yearHours);
+  const allTimeHoursLabel = formatDurationHours(allTimeHours);
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid gap-4 sm:grid-cols-[1.4fr_0.6fr]">
       <div className="relative overflow-hidden rounded-3xl bg-white p-6 shadow-sm ring-1 ring-wild-sand">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-wild-stone">
-              Current Year
-            </p>
-            <p className="mt-1 font-serif text-3xl text-wild-bark">
-              {formatDurationHours(yearHours)}
-            </p>
-          </div>
-          <div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-wild-sand/30">
-            <span className="text-xs font-bold text-wild-moss">{progressPercent}%</span>
+        <div className="flex flex-wrap items-center gap-6">
+          <div className="relative flex h-28 w-28 items-center justify-center rounded-full bg-wild-sand/30">
+            <span className="font-serif text-2xl text-wild-moss">{progressPercent}%</span>
             <svg
               className="absolute h-full w-full -rotate-90 text-wild-sand"
               viewBox="0 0 36 36"
@@ -39,7 +33,7 @@ export const StatsSummary = ({ db, year }: StatsSummaryProps) => {
                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="4"
+                strokeWidth="3"
               />
               <path
                 className="text-wild-moss"
@@ -47,27 +41,28 @@ export const StatsSummary = ({ db, year }: StatsSummaryProps) => {
                 d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="4"
+                strokeWidth="3"
               />
             </svg>
           </div>
+          <div className="flex-1">
+            <p className="text-sm text-wild-stone">
+              {`You've spent ${yearHoursLabel} outside this year.`}
+            </p>
+            <p className="mt-3 font-serif text-4xl text-wild-bark">{yearHoursLabel}</p>
+            <p className="mt-2 text-xs uppercase tracking-[0.3em] text-wild-stone">
+              Current year total
+            </p>
+          </div>
         </div>
-        <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-wild-paper">
-          <div
-            style={{ width: `${progressPercent}%` }}
-            className="h-full rounded-full bg-wild-moss transition-all duration-1000"
-          />
-        </div>
-        <p className="mt-2 text-xs text-wild-stone">
+        <p className="mt-4 text-xs text-wild-stone">
           {yearlyGoalHours ? `Goal: ${yearlyGoalHours}h` : 'No goal set'}
         </p>
       </div>
 
-      <div className="flex flex-col justify-center rounded-3xl bg-[#E6E2D6] p-6 shadow-sm">
+      <div className="flex flex-col justify-center rounded-3xl bg-wild-sand/70 p-6 shadow-sm ring-1 ring-wild-sand/70">
         <p className="text-xs font-bold uppercase tracking-wider text-wild-bark/60">Lifetime</p>
-        <p className="mt-1 font-serif text-3xl text-wild-bark">
-          {formatDurationHours(allTimeHours)}
-        </p>
+        <p className="mt-2 font-serif text-3xl text-wild-bark">{allTimeHoursLabel}</p>
         <p className="mt-2 text-xs text-wild-bark/60">Total time outdoors</p>
       </div>
     </div>

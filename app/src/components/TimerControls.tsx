@@ -115,8 +115,23 @@ export const TimerControls = ({ db, now }: TimerControlsProps) => {
       </header>
 
       <div className="relative z-10 mt-8 flex flex-col items-center justify-center text-center">
-        <div className="font-serif text-[4rem] font-light leading-none tracking-tight tabular-nums">
-          {elapsed}
+        <div className="relative flex items-center gap-3">
+          {isActive ? (
+            <div className="absolute -inset-6 rounded-full bg-wild-fern/30 blur-2xl animate-pulse-slow" />
+          ) : null}
+          <div className="relative font-serif text-[4rem] font-light leading-none tracking-tight tabular-nums">
+            {elapsed}
+          </div>
+          {isActive ? (
+            <button
+              type="button"
+              aria-label="Adjust start time"
+              onClick={() => setIsEditing((prev) => !prev)}
+              className="relative flex h-10 w-10 items-center justify-center rounded-full bg-wild-paper/15 text-wild-paper transition-colors hover:bg-wild-paper/25"
+            >
+              <Edit2 className="h-4 w-4" />
+            </button>
+          ) : null}
         </div>
         <p className={`mt-2 text-sm ${isActive ? 'text-wild-sand/80' : 'text-wild-stone'}`}>
           {isActive ? 'Time in the wild' : 'Ready for adventure?'}
@@ -134,24 +149,14 @@ export const TimerControls = ({ db, now }: TimerControlsProps) => {
             <span>Start Adventure</span>
           </button>
         ) : (
-          <div className="grid grid-cols-[1fr_auto] gap-3">
-            <button
-              type="button"
-              onClick={handleStop}
-              className="flex items-center justify-center gap-2 rounded-2xl bg-wild-clay py-4 font-semibold text-white shadow-lg shadow-wild-clay/30 transition-all active:scale-95"
-            >
-              <Square className="h-5 w-5 fill-current" />
-              <span>Finish</span>
-            </button>
-            <button
-              type="button"
-              aria-label="Adjust start time"
-              onClick={() => setIsEditing((prev) => !prev)}
-              className="flex h-full w-14 items-center justify-center rounded-2xl bg-wild-fern/20 text-wild-sand transition-colors hover:bg-wild-fern/40"
-            >
-              <Edit2 className="h-5 w-5" />
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleStop}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-wild-clay py-4 font-semibold text-white shadow-lg shadow-wild-clay/30 transition-all active:scale-95"
+          >
+            <Square className="h-5 w-5 fill-current" />
+            <span>Finish Adventure</span>
+          </button>
         )}
       </div>
 

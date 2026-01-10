@@ -4,6 +4,7 @@ import type { WildlingsDb } from '../db/db';
 import { useLogs } from '../hooks/useLogs';
 import { clearEditingLogId, setEditingLogId } from '../db/db';
 import { formatLocalDateTime, fromLocalInput, toLocalInput } from '../lib/datetime';
+import { Pencil, Trash2 } from 'lucide-react';
 
 type LogsManagerProps = {
   db: WildlingsDb;
@@ -137,6 +138,19 @@ export const LogsManager = ({ db, now }: LogsManagerProps) => {
     }, []);
   }, [logs]);
 
+  const getBorderClass = (log: (typeof logs)[number]) => {
+    if (log.id === activeLogId) {
+      return 'border-wild-clay';
+    }
+
+    if (!log.end_at) {
+      return 'border-wild-fern';
+    }
+
+    const durationHours = Math.max(0, dayjs(log.end_at).diff(dayjs(log.start_at), 'minute') / 60);
+    return durationHours >= 1 ? 'border-wild-moss' : 'border-wild-sand';
+  };
+
   return (
     <section className="animate-fade-in rounded-3xl bg-wild-paper p-6 shadow-sm ring-1 ring-wild-sand">
       <header className="mb-4">
@@ -155,7 +169,7 @@ export const LogsManager = ({ db, now }: LogsManagerProps) => {
             className="rounded-full bg-wild-moss px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white transition-transform active:scale-95"
             onClick={() => setIsFormOpen((open) => !open)}
           >
-            {isFormOpen ? 'Close' : 'Add'}
+            {isFormOpen ? 'Close' : 'Add past log'}
           </button>
         </div>
 
@@ -221,17 +235,19 @@ export const LogsManager = ({ db, now }: LogsManagerProps) => {
               {group.entries.map((log) => (
                 <article
                   key={log.id}
-                  className={`animate-slide-up rounded-xl border-l-4 bg-white p-4 shadow-sm ${
-                    log.id === activeLogId ? 'border-wild-clay' : 'border-wild-fern'
-                  }`}
+                  className={`animate-slide-up rounded-xl border-l-4 bg-white p-4 shadow-sm ${getBorderClass(
+                    log,
+                  )}`}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <p className="text-sm text-wild-bark">
+                      <p className="text-sm font-semibold text-wild-bark">
                         {formatLocalDateTime(log.start_at)} →{' '}
                         {log.end_at ? formatLocalDateTime(log.end_at) : 'Running'}
                       </p>
-                      {log.note ? <p className="text-sm text-wild-stone">{log.note}</p> : null}
+                      {log.note ? (
+                        <p className="text-sm font-serif italic text-wild-stone/80">{log.note}</p>
+                      ) : null}
                       {log.id === activeLogId ? (
                         <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-wild-clay">
                           Active timer
@@ -241,19 +257,23 @@ export const LogsManager = ({ db, now }: LogsManagerProps) => {
                     <div className="flex items-center gap-3">
                       <button
                         type="button"
-                        className="text-sm font-semibold text-wild-stone"
+                        className="rounded-full p-2 text-wild-stone transition-colors hover:bg-wild-sand/40"
                         onClick={() => beginEdit(log)}
                         disabled={log.id === activeLogId}
+                        aria-label="Edit log"
+                        title="Edit log"
                       >
-                        Edit log
+                        <Pencil className="h-4 w-4" />
                       </button>
                       <button
                         type="button"
-                        className="text-sm font-semibold text-wild-clay"
+                        className="rounded-full p-2 text-wild-clay transition-colors hover:bg-wild-clay/10"
                         onClick={() => handleDelete(log.id)}
                         disabled={log.id === activeLogId}
+                        aria-label="Delete log"
+                        title="Delete log"
                       >
-                        Delete log
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
