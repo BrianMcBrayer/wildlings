@@ -51,3 +51,56 @@ Use this file to capture decisions, assumptions, and context needed across slice
 ## 2026-01-08
 
 - Added `StatsSummary` UI component backed by `useStats` with tests to render totals and yearly goal progress.
+
+## 2026-01-09
+
+- Added `TimerControls` UI component wired to `useTimer`, showing running state and start/stop actions with TDD coverage.
+- Added `LogsManager` UI component for manual log entry, list display, and delete actions with RTL coverage.
+- Extended `LogsManager` to support editing logs and disable edit/delete for the active log, with updated tests.
+
+## 2026-01-10
+
+- Added Zod sync contract schemas plus frontend contract tests covering push/pull payload shapes.
+- Implemented frontend sync engine with outbox push, pull merge that skips pending local ops, and server-field application for logs.
+- Persisted sync backoff state in metadata (`sync_backoff_ms`, `next_sync_at`) and added backoff handling on failures.
+- Added `useSync` hook with startup/visibility triggers and debounced sync scheduling.
+- Introduced MSW for sync tests to mock `/sync/push` and `/sync/pull` endpoints.
+
+## 2026-01-11
+
+- Added FastAPI sync endpoints (`/sync/push`, `/sync/pull`) with SQLModel-backed `Log` and `SyncOp` tables for idempotent push handling.
+- Pull cursor is an ISO-8601 server timestamp; responses return the max `updated_at_server` from the page or echo the cursor when no changes.
+- Delete ops set `deleted_at_server` and `updated_at_server`; when deleting unknown IDs, server creates a tombstone with `start_at` from `deleted_at_local`.
+- Added strict CORS configuration via `CORS_ALLOW_ORIGINS` and optional `INTERNAL_SYNC_TOKEN` gate for sync endpoints.
+- Added Alembic configuration and initial migration for sync tables.
+
+## 2026-01-12
+
+- Added Vite PWA config (`app/vite.config.ts`) with manifest metadata and Workbox `navigateFallback` to keep the shell available offline.
+- Added a Vitest check for the PWA config (`app/tests/pwaConfig.test.ts`) and set it to run in node to avoid jsdom/esbuild issues.
+- Manual PWA verification: build and serve the app, load once online, then toggle offline in devtools and reload to confirm shell caching works.
+
+## 2026-01-13
+
+- Scaffolded Vite app entry (`app/index.html`, `app/src/main.tsx`, `app/src/app.tsx`) and wired TanStack Router file-based routes with a generated `app/src/routeTree.gen.ts`.
+- Added base shell layout and three routes (home, logs, settings) that compose existing Timer/Stats/Logs components.
+- Introduced Tailwind + PostCSS config for styling and added a minimal favicon in `app/public`.
+- Added `app/tests/appRoutes.test.tsx` to assert core routes render, plus router setup helper to share context.
+
+## 2026-01-14
+
+- Updated backend storage guidance to SQLite for a single-container deployment.
+- FastAPI can now serve built frontend assets via `STATIC_DIR`, including an SPA fallback for client routes.
+- Replaced the placeholder Dockerfile with a multi-stage build (Vite build + FastAPI runtime) and added `docker-compose.yml` with a persistent SQLite volume.
+
+## 2026-01-15
+
+- Enabled SQLite WAL mode on backend engine creation to improve concurrent read/write behavior.
+- Added a Docker Compose healthcheck hitting `/sync/pull` with optional internal token header.
+- Loaded `INTERNAL_SYNC_TOKEN` into app settings at startup and wired sync auth to use the cached setting.
+- Added a header sync status pill wired to `useSync` with retry-on-error.
+- Made `/sync/push` atomic for new ops: if any new op fails validation, no new ops are applied or acked.
+- Deployment: Caddy reverse proxy should strip `X-Internal-Token` from external requests:
+  - `header_up -X-Internal-Token`
+- Added coverage to ensure server time drives `updated_at_server` on push (clock drift mitigation).
+- Added root README with dev/test/deploy notes; removed the refactor checklist once completed.
