@@ -1,4 +1,5 @@
 import type { LogRecord } from './db';
+import { getYearWindowMs, parseInstantMs } from '../lib/datetime';
 
 type Totals = {
   yearHours: number;
@@ -6,28 +7,18 @@ type Totals = {
 };
 
 const MS_PER_HOUR = 1000 * 60 * 60;
+const MINUTES_PER_HOUR = 60;
 
 const isDeleted = (log: LogRecord) => Boolean(log.deleted_at_local || log.deleted_at_server);
 
-const parseInstant = (value: string) => {
-  const ms = Date.parse(value);
-  return Number.isNaN(ms) ? null : ms;
-};
-
 const durationMs = (startMs: number, endMs: number) => Math.max(0, endMs - startMs);
-
-const getYearWindowMs = (year: number) => {
-  const start = new Date(year, 0, 1, 0, 0, 0, 0);
-  const end = new Date(year + 1, 0, 1, 0, 0, 0, 0);
-  return { startMs: start.getTime(), endMs: end.getTime() };
-};
 
 const getLogRangeMs = (log: LogRecord) => {
   if (!log.end_at) {
     return null;
   }
-  const startMs = parseInstant(log.start_at);
-  const endMs = parseInstant(log.end_at);
+  const startMs = parseInstantMs(log.start_at);
+  const endMs = parseInstantMs(log.end_at);
   if (startMs === null || endMs === null) {
     return null;
   }
@@ -74,4 +65,13 @@ export const computeTotals = (logs: LogRecord[], year: number): Totals => {
     yearHours: yearMs / MS_PER_HOUR,
     allTimeHours: allTimeMs / MS_PER_HOUR,
   };
+};
+
+export const formatDurationHours = (hours: number) => {
+  const safeHours = Number.isFinite(hours) ? Math.max(0, hours) : 0;
+  const totalMinutes = Math.round(safeHours * MINUTES_PER_HOUR);
+  const wholeHours = Math.floor(totalMinutes / MINUTES_PER_HOUR);
+  const minutes = totalMinutes % MINUTES_PER_HOUR;
+
+  return `${wholeHours}h ${minutes}m`;
 };

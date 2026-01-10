@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { LogRecord, WildlingsDb } from '../db/db';
 import { getMetadata } from '../db/db';
 import { computeTotals } from '../db/stats';
+import { currentYear } from '../lib/datetime';
 
 type UseStatsOptions = {
   year?: number;
@@ -18,13 +19,13 @@ type UseStatsResult = {
 
 export const useStats = (db: WildlingsDb, options: UseStatsOptions = {}): UseStatsResult => {
   const [logs, setLogs] = useState<LogRecord[]>([]);
-  const [year, setYear] = useState<number>(options.year ?? new Date().getFullYear());
+  const [year, setYear] = useState<number>(options.year ?? currentYear());
   const [yearlyGoalHours, setYearlyGoalHours] = useState<number | null>(null);
   const [yearlyGoalYear, setYearlyGoalYear] = useState<number | null>(null);
 
   const refresh = useCallback(async () => {
     const [storedLogs, metadata] = await Promise.all([db.logs.toArray(), getMetadata(db)]);
-    const targetYear = options.year ?? new Date().getFullYear();
+    const targetYear = options.year ?? currentYear();
     setLogs(storedLogs);
     setYear(targetYear);
 
@@ -44,7 +45,7 @@ export const useStats = (db: WildlingsDb, options: UseStatsOptions = {}): UseSta
         return;
       }
       setLogs([]);
-      setYear(options.year ?? new Date().getFullYear());
+      setYear(options.year ?? currentYear());
       setYearlyGoalHours(null);
       setYearlyGoalYear(null);
     });

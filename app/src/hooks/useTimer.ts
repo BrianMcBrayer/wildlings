@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { WildlingsDb, LogRecord } from '../db/db';
-import { getMetadata, startTimerWithOutbox, stopTimerWithOutbox } from '../db/db';
+import {
+  getMetadata,
+  startTimerWithOutbox,
+  stopTimerWithOutbox,
+  updateActiveTimerStartWithOutbox,
+} from '../db/db';
+import { nowIso } from '../lib/datetime';
 
 type UseTimerOptions = {
   now?: () => string;
@@ -12,12 +18,13 @@ type UseTimerResult = {
   isActive: boolean;
   startTimer: (startAt?: string) => Promise<LogRecord>;
   stopTimer: (endAt?: string) => Promise<LogRecord>;
+  updateActiveStartAt: (startAt: string) => Promise<LogRecord>;
 };
 
 export const useTimer = (db: WildlingsDb, options: UseTimerOptions = {}): UseTimerResult => {
   const [activeLogId, setActiveLogId] = useState<string | null>(null);
   const [activeStartAt, setActiveStartAt] = useState<string | null>(null);
-  const now = options.now ?? (() => new Date().toISOString());
+  const now = options.now ?? nowIso;
 
   useEffect(() => {
     let mounted = true;
@@ -66,11 +73,24 @@ export const useTimer = (db: WildlingsDb, options: UseTimerOptions = {}): UseTim
     [db, now],
   );
 
+  const updateActiveStartAt = useCallback(
+    async (startAt: string) => {
+      const log = await updateActiveTimerStartWithOutbox(db, {
+        startAt,
+        updatedAtLocal: now(),
+      });
+      setActiveStartAt(log.start_at);
+      return log;
+    },
+    [db, now],
+  );
+
   return {
     activeLogId,
     activeStartAt,
     isActive: activeLogId !== null,
     startTimer,
     stopTimer,
+    updateActiveStartAt,
   };
 };

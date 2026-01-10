@@ -7,6 +7,7 @@ import {
   startTimerWithOutbox,
   updateLogWithOutbox,
 } from '../src/db/db';
+import type { LogRecord } from '../src/db/db';
 
 const makeTimestamp = (suffix: string) => `2026-01-01T${suffix}Z`;
 

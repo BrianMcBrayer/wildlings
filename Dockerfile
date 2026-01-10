@@ -1,11 +1,34 @@
 # syntax=docker/dockerfile:1
-FROM alpine:3.20
+FROM node:20-alpine AS app-build
+WORKDIR /app
+COPY app/package.json app/package-lock.json ./app/
+WORKDIR /app/app
+RUN npm ci
+COPY app/ ./
+RUN npm run build
 
-LABEL org.opencontainers.image.title="Wildlings"
-LABEL org.opencontainers.image.description="Placeholder image; full build added in later slices."
+FROM python:3.12-slim AS runtime
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+WORKDIR /app
 
-RUN adduser -D -g '' wildlings
+RUN pip install --no-cache-dir uv
+COPY api/ /app/api/
+WORKDIR /app/api
+RUN uv sync --frozen --no-dev
+
+WORKDIR /app
+COPY --from=app-build /app/app/dist /app/app/dist
+
+ENV STATIC_DIR=/app/app/dist
+ENV DATABASE_URL=sqlite:////data/wildlings.db
+ENV PATH="/app/api/.venv/bin:$PATH"
+ENV PYTHONPATH=/app
+
+RUN useradd --create-home --shell /usr/sbin/nologin wildlings \
+    && mkdir -p /data \
+    && chown -R wildlings:wildlings /data
 USER wildlings
-WORKDIR /home/wildlings
 
-CMD ["sh","-c","echo 'Wildlings image placeholder; no app configured yet.'"]
+EXPOSE 8000
+CMD ["sh","-c","cd /app/api && alembic -c /app/api/alembic.ini upgrade head && uvicorn api.main:app --app-dir /app --host 0.0.0.0 --port 8000"]

@@ -30,8 +30,11 @@ export type MetadataRecord = {
   device_id: string | null;
   active_log_id: string | null;
   active_start_at: string | null;
+  editing_log_id: string | null;
   last_sync_cursor: string | null;
   last_sync_at: string | null;
+  next_sync_at: string | null;
+  sync_backoff_ms: number | null;
   yearly_goal_hours: number | null;
   yearly_goal_year: number | null;
 };
@@ -68,8 +71,11 @@ const emptyMetadata = (): MetadataRecord => ({
   device_id: null,
   active_log_id: null,
   active_start_at: null,
+  editing_log_id: null,
   last_sync_cursor: null,
   last_sync_at: null,
+  next_sync_at: null,
+  sync_backoff_ms: null,
   yearly_goal_hours: null,
   yearly_goal_year: null,
 });
@@ -113,6 +119,16 @@ export const clearActiveTimer = async (db: WildlingsDb) => {
     active_log_id: null,
     active_start_at: null,
   });
+};
+
+export const setEditingLogId = async (db: WildlingsDb, logId: string) => {
+  await getMetadata(db);
+  await db.metadata.update(METADATA_ID, { editing_log_id: logId });
+};
+
+export const clearEditingLogId = async (db: WildlingsDb) => {
+  await getMetadata(db);
+  await db.metadata.update(METADATA_ID, { editing_log_id: null });
 };
 
 export const setYearlyGoal = async (db: WildlingsDb, params: { year: number; hours: number }) => {
@@ -347,6 +363,43 @@ export const stopTimerWithOutbox = async (db: WildlingsDb, params: { endAt: stri
       });
     });
     await clearActiveTimer(db);
+
+    return updated;
+  })();
+
+export const updateActiveTimerStartWithOutbox = async (
+  db: WildlingsDb,
+  params: { startAt: string; updatedAtLocal: string },
+) =>
+  (async () => {
+    const metadata = await getMetadata(db);
+    if (!metadata.active_log_id) {
+      throw new Error('No active timer');
+    }
+
+    const existing = await db.logs.get(metadata.active_log_id);
+    if (!existing) {
+      throw new Error(`Active log ${metadata.active_log_id} not found`);
+    }
+
+    const updated: LogRecord = {
+      ...existing,
+      start_at: params.startAt,
+      updated_at_local: params.updatedAtLocal,
+    };
+
+    const deviceId = await getOrCreateDeviceId(db);
+    await db.transaction('rw', db.logs, db.sync_queue, db.metadata, async () => {
+      await db.logs.put(updated);
+      await db.metadata.update(METADATA_ID, { active_start_at: params.startAt });
+      await enqueueOp(db, {
+        deviceId,
+        action: 'upsert',
+        recordId: updated.id,
+        payload: updated,
+        createdAtLocal: updated.updated_at_local,
+      });
+    });
 
     return updated;
   })();

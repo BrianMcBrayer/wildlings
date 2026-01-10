@@ -6,6 +6,7 @@ import {
   getMetadata,
   updateLogWithOutbox,
 } from '../db/db';
+import { nowIso } from '../lib/datetime';
 
 type UseLogsOptions = {
   now?: () => string;
@@ -42,7 +43,7 @@ export const useLogs = (db: WildlingsDb, options: UseLogsOptions = {}): UseLogsR
   const [logs, setLogs] = useState<LogRecord[]>([]);
   const [activeLogId, setActiveLogId] = useState<string | null>(null);
   const [activeStartAt, setActiveStartAt] = useState<string | null>(null);
-  const now = options.now ?? (() => new Date().toISOString());
+  const now = options.now ?? nowIso;
 
   const refresh = useCallback(async () => {
     const [allLogs, metadata] = await Promise.all([db.logs.toArray(), getMetadata(db)]);

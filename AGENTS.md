@@ -93,7 +93,7 @@ A specialized **offline-first PWA** for tracking time spent outdoors (inspired b
 ### 3.2 Backend
 
 - Framework: **FastAPI** (Python 3.12+)
-- Database: **PostgreSQL**
+- Database: **SQLite** (single-file, local to the backend container)
 - ORM/models: **SQLModel**
 - Validation: **Pydantic v2**
 - Migrations: **Alembic** (required)
@@ -411,6 +411,7 @@ The sync protocol must support:
   - `api/` for backend routes and models
 
 - **Be proactive with executions:** if the user requests a tool install or command run (e.g., installing or running pre-commit), execute it without asking for confirmation. Use best judgment on safety/permissions, but default to action.
+- **Agent directive: proactive tooling:** if required tooling or deps are missing (e.g., pytest, uv, npm), install them immediately and rerun tests without asking; do not stop after a “command not found.”
 
 ---
 

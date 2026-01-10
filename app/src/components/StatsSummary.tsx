@@ -1,13 +1,12 @@
 import React from 'react';
 import type { WildlingsDb } from '../db/db';
+import { formatDurationHours } from '../db/stats';
 import { useStats } from '../hooks/useStats';
 
 type StatsSummaryProps = {
   db: WildlingsDb;
   year?: number;
 };
-
-const formatHours = (value: number) => value.toFixed(1);
 
 export const StatsSummary = ({ db, year }: StatsSummaryProps) => {
   const {
@@ -25,20 +24,22 @@ export const StatsSummary = ({ db, year }: StatsSummaryProps) => {
       : null;
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-2xl bg-[#f6f1e6] p-6 shadow-sm">
       <header className="mb-4">
         <p className="text-sm uppercase tracking-wide text-slate-500">Year {resolvedYear}</p>
-        <h2 className="text-2xl font-semibold text-slate-900">Outdoor time</h2>
+        <h2 className="text-2xl font-semibold text-slate-900">Your Outdoor Adventure</h2>
       </header>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-xl bg-slate-50 p-4">
           <p className="text-xs uppercase tracking-wide text-slate-500">Year hours</p>
-          <p className="text-2xl font-semibold text-slate-900">{formatHours(yearHours)}h</p>
+          <p className="text-2xl font-semibold text-slate-900">{formatDurationHours(yearHours)}</p>
         </div>
         <div className="rounded-xl bg-slate-50 p-4">
           <p className="text-xs uppercase tracking-wide text-slate-500">All time</p>
-          <p className="text-2xl font-semibold text-slate-900">{formatHours(allTimeHours)}h</p>
+          <p className="text-2xl font-semibold text-slate-900">
+            {formatDurationHours(allTimeHours)}
+          </p>
         </div>
       </div>
 
@@ -57,7 +58,7 @@ export const StatsSummary = ({ db, year }: StatsSummaryProps) => {
             </div>
           </div>
         ) : (
-          <p className="text-sm text-slate-500">No yearly goal set</p>
+          <p className="text-sm text-slate-500">Set a goal to track your outdoor journey!</p>
         )}
       </div>
     </section>

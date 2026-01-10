@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import type { LogRecord } from '../src/db/db';
-import { computeTotals } from '../src/db/stats';
+import { computeTotals, formatDurationHours } from '../src/db/stats';
 
 const makeTimestamp = (value: string) => value;
 
@@ -91,5 +91,17 @@ describe('stats totals respect local timezone boundaries', () => {
 
     expect(totals2025.yearHours).toBeCloseTo(2, 5);
     expect(totals2026.yearHours).toBeCloseTo(2, 5);
+  });
+});
+
+describe('stats duration formatting', () => {
+  it('formats hours as hours and minutes', () => {
+    expect(formatDurationHours(0)).toBe('0h 0m');
+    expect(formatDurationHours(1.5)).toBe('1h 30m');
+    expect(formatDurationHours(2)).toBe('2h 0m');
+  });
+
+  it('rounds minutes and carries over to hours when needed', () => {
+    expect(formatDurationHours(1.999)).toBe('2h 0m');
   });
 });
