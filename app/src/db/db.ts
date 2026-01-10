@@ -80,6 +80,9 @@ const emptyMetadata = (): MetadataRecord => ({
   yearly_goal_year: null,
 });
 
+const isDatabaseClosedError = (error: unknown) =>
+  error instanceof Error && error.name === 'DatabaseClosedError';
+
 export const getMetadata = async (db: WildlingsDb) => {
   const existing = await db.metadata.get(METADATA_ID);
   if (existing) {
@@ -122,13 +125,25 @@ export const clearActiveTimer = async (db: WildlingsDb) => {
 };
 
 export const setEditingLogId = async (db: WildlingsDb, logId: string) => {
-  await getMetadata(db);
-  await db.metadata.update(METADATA_ID, { editing_log_id: logId });
+  try {
+    await getMetadata(db);
+    await db.metadata.update(METADATA_ID, { editing_log_id: logId });
+  } catch (error) {
+    if (!isDatabaseClosedError(error)) {
+      throw error;
+    }
+  }
 };
 
 export const clearEditingLogId = async (db: WildlingsDb) => {
-  await getMetadata(db);
-  await db.metadata.update(METADATA_ID, { editing_log_id: null });
+  try {
+    await getMetadata(db);
+    await db.metadata.update(METADATA_ID, { editing_log_id: null });
+  } catch (error) {
+    if (!isDatabaseClosedError(error)) {
+      throw error;
+    }
+  }
 };
 
 export const setYearlyGoal = async (db: WildlingsDb, params: { year: number; hours: number }) => {

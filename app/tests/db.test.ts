@@ -2,11 +2,13 @@ import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import {
   clearActiveTimer,
+  clearEditingLogId,
   createDb,
   deleteLogWithOutbox,
   getMetadata,
   getOrCreateDeviceId,
   setActiveTimer,
+  setEditingLogId,
   setYearlyGoal,
   upsertLogWithOutbox,
 } from '../src/db/db';
@@ -121,5 +123,13 @@ describe('Dexie local data foundation', () => {
     metadata = await getMetadata(db);
     expect(metadata.yearly_goal_year).toBe(2026);
     expect(metadata.yearly_goal_hours).toBe(250);
+  });
+
+  it('ignores editing metadata updates after the db is closed', async () => {
+    const db = createDb(dbName);
+    await db.delete();
+
+    await expect(setEditingLogId(db, 'log-closed')).resolves.toBeUndefined();
+    await expect(clearEditingLogId(db)).resolves.toBeUndefined();
   });
 });

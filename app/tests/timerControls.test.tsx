@@ -25,10 +25,9 @@ describe('TimerControls', () => {
     db = createDb(dbName);
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     cleanup();
-    db.close();
-    void db.delete();
+    await db.delete();
     vi.useRealTimers();
   });
 

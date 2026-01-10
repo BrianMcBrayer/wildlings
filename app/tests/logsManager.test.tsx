@@ -36,10 +36,9 @@ describe('LogsManager', () => {
     db = createDb(dbName);
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     cleanup();
-    db.close();
-    void db.delete();
+    await db.delete();
   });
 
   it('renders existing logs from the local database', async () => {

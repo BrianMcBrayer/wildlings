@@ -27,10 +27,9 @@ describe('StatsSummary', () => {
     db = createDb(dbName);
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     cleanup();
-    db.close();
-    void db.delete();
+    await db.delete();
   });
 
   it('renders totals and yearly goal progress', async () => {
