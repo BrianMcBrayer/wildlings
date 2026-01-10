@@ -137,28 +137,36 @@ export const TimerControls = ({ db, now }: TimerControlsProps) => {
       </div>
 
       {/* Action Button */}
-      <div className="w-full max-w-md">
+      <div className="flex w-full justify-center">
         {!isActive ? (
           <button
             type="button"
             onClick={handleStart}
-            className="group relative flex w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-[2.5rem] bg-wild-moss px-8 py-10 text-wild-paper shadow-xl shadow-wild-moss/20 transition-all duration-300 hover:scale-[1.02] hover:bg-wild-moss/90 hover:shadow-2xl hover:shadow-wild-moss/30 active:scale-95 active:duration-100"
+            className="group relative flex h-64 w-64 flex-col items-center justify-center gap-4 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-wild-paper shadow-[0_10px_20px_rgba(16,185,129,0.3),0_6px_6px_rgba(0,0,0,0.1),inset_0_-4px_4px_rgba(0,0,0,0.1)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_15px_25px_rgba(16,185,129,0.4),0_8px_8px_rgba(0,0,0,0.1),inset_0_-4px_4px_rgba(0,0,0,0.1)] active:scale-95 active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.2)]"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-            <Play className="h-12 w-12 fill-current transition-transform group-hover:scale-110" />
-            <span className="text-2xl font-bold tracking-wide">Start Adventure</span>
-            <span className="text-sm font-medium text-wild-paper/70">Click to begin tracking</span>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+            <Play className="h-16 w-16 fill-current pl-2 transition-transform group-hover:scale-110" />
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-xl font-bold tracking-wide uppercase">Start</span>
+              <span className="text-xs font-medium uppercase tracking-widest opacity-80">
+                Adventure
+              </span>
+            </div>
           </button>
         ) : (
           <button
             type="button"
             onClick={handleStop}
-            className="group relative flex w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-[2.5rem] bg-wild-clay px-8 py-10 text-white shadow-xl shadow-wild-clay/20 transition-all duration-300 hover:scale-[1.02] hover:bg-wild-clay/90 hover:shadow-2xl hover:shadow-wild-clay/30 active:scale-95 active:duration-100"
+            className="group relative flex h-64 w-64 flex-col items-center justify-center gap-4 rounded-full bg-gradient-to-br from-red-500 to-red-600 text-white shadow-[0_10px_20px_rgba(239,68,68,0.3),0_6px_6px_rgba(0,0,0,0.1),inset_0_-4px_4px_rgba(0,0,0,0.1)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_15px_25px_rgba(239,68,68,0.4),0_8px_8px_rgba(0,0,0,0.1),inset_0_-4px_4px_rgba(0,0,0,0.1)] active:scale-95 active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.2)]"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-            <Square className="h-10 w-10 fill-current" />
-            <span className="text-2xl font-bold tracking-wide">Finish Adventure</span>
-            <span className="text-sm font-medium text-white/70">Save this session</span>
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+            <Square className="h-14 w-14 fill-current transition-transform group-hover:scale-110" />
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-xl font-bold tracking-wide uppercase">Finish</span>
+              <span className="text-xs font-medium uppercase tracking-widest opacity-80">
+                Adventure
+              </span>
+            </div>
           </button>
         )}
       </div>

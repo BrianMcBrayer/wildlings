@@ -52,7 +52,7 @@ export const StatsSummary = ({ db, year }: StatsSummaryProps) => {
               <span className="font-serif text-5xl font-bold text-wild-moss">
                 {progressPercent}%
               </span>
-              <span className="text-xs font-bold uppercase tracking-widest text-wild-stone/60">
+              <span className="mt-2 text-xs font-bold uppercase tracking-widest text-wild-stone/60">
                 Of Goal
               </span>
             </div>
