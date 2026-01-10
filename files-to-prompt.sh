@@ -10,8 +10,8 @@ paths=(
   docker-compose.yml
 )
 
-uvx --from files-to-prompt files-to-prompt \
-  "${paths[@]}" \
+git ls-files -z -- "${paths[@]}" | uvx --from files-to-prompt files-to-prompt \
+  --null \
   --ignore ".DS_Store" \
   --ignore ".env" \
   --ignore ".env.*" \

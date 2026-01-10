@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>Wildlings</Name>
+  <Repository>ghcr.io/brianmcbrayer/wildlings:latest</Repository>
+  <Registry>https://github.com/BrianMcBrayer/wildlings</Registry>
+  <Network>br0</Network>
+  <MyIP>192.168.1.56</MyIP>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/BrianMcBrayer/wildlings/issues</Support>
+  <Project>https://github.com/BrianMcBrayer/wildlings</Project>
+  <ReadMe/>
+  <Overview>Offline-first PWA for tracking outdoor time. Local-first UI with safe sync to a FastAPI backend when online.</Overview>
+  <Category>Productivity: Tools:</Category>
+  <WebUI>http://[IP]:[PORT:8000]/</WebUI>
+  <TemplateURL/>
+  <Icon/>
+  <ExtraParams>--user 99:100</ExtraParams>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <DonateText/>
+  <DonateLink/>
+  <Requires/>
+  <Config Name="WebUI Port" Target="8000" Default="8000" Mode="tcp" Description="The port for the FastAPI web server and PWA." Type="Port" Display="always" Required="true" Mask="false">8000</Config>
+  <Config Name="App Data Storage" Target="/data" Default="/mnt/user/appdata/wildlings" Mode="rw" Description="Location for the SQLite database file." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/wildlings</Config>
+  <Config Name="Database URL" Target="DATABASE_URL" Default="sqlite:////data/wildlings.db" Mode="{3}" Description="Internal SQLModel/SQLAlchemy connection string." Type="Variable" Display="advanced" Required="true" Mask="false">sqlite:////data/wildlings.db</Config>
+  <Config Name="Static Dir" Target="STATIC_DIR" Default="/app/app/dist" Mode="{3}" Description="Location of built frontend assets inside the container." Type="Variable" Display="advanced" Required="true" Mask="false">/app/app/dist</Config>
+  <Config Name="CORS Allowed Origins" Target="CORS_ALLOW_ORIGINS" Default="" Mode="{3}" Description="Comma-separated list of allowed origins for CORS. Leave blank for same-origin only." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="Internal Sync Token" Target="INTERNAL_SYNC_TOKEN" Default="" Mode="{3}" Description="Optional hardening token required on /sync/* when set." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
+  <TailscaleStateDir/>
+</Container>
