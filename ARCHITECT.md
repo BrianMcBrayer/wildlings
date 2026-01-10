@@ -105,3 +105,4 @@ Use this file to capture decisions, assumptions, and context needed across slice
 - Added coverage to ensure server time drives `updated_at_server` on push (clock drift mitigation).
 - Added root README with dev/test/deploy notes; removed the refactor checklist once completed.
 - CI/CD: aligned GitHub workflows with the `mcmoney` pattern (release trigger in CI, and split commit vs release Docker builds with `sha-<short>` and release tags).
+- Docker workflow now runs frontend/backend tests before building images, so pushes/releases are gated on green CI.
