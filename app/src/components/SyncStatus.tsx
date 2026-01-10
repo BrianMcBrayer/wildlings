@@ -20,13 +20,15 @@ export const SyncStatus = ({ db }: SyncStatusProps) => {
   }
 
   return (
-    <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-slate-500">
-      <span className={`h-2 w-2 rounded-full ${dotClass}`} aria-hidden="true" />
-      <span>{label}</span>
+    <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-wild-stone shadow-sm ring-1 ring-wild-sand/70">
+        <span className={`h-2 w-2 rounded-full ${dotClass}`} aria-hidden="true" />
+        <span>{label}</span>
+      </div>
       {lastError ? (
         <button
           type="button"
-          className="rounded-full bg-white/80 px-2 py-1 text-[0.7rem] font-semibold text-rose-600 shadow-sm"
+          className="rounded-full bg-wild-clay px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-white shadow-sm transition-transform active:scale-95"
           onClick={() => void syncNow()}
         >
           Retry sync

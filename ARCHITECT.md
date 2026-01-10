@@ -106,3 +106,9 @@ Use this file to capture decisions, assumptions, and context needed across slice
 - Added root README with dev/test/deploy notes; removed the refactor checklist once completed.
 - CI/CD: aligned GitHub workflows with the `mcmoney` pattern (release trigger in CI, and split commit vs release Docker builds with `sha-<short>` and release tags).
 - Docker workflow now runs frontend/backend tests before building images, so pushes/releases are gated on green CI.
+
+## 2026-01-16
+
+- Introduced the "Digital Field Guide" visual system: Wildlings color palette, serif/sans font pairing, and global base styles.
+- Restyled Timer, Stats, Logs, and root layout to use journal-inspired cards, mobile bottom nav, and pill-style sync status.
+- Logs UI now groups entries by day labels (Today/Yesterday/Month Day) with a collapsible manual entry form.

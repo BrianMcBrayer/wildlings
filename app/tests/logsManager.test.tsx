@@ -2,9 +2,11 @@ import React from 'react';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { randomUUID } from 'node:crypto';
+import dayjs from 'dayjs';
 import { createDb, setActiveTimer } from '../src/db/db';
 import type { LogRecord } from '../src/db/db';
 import { LogsManager } from '../src/components/LogsManager';
+import { formatLocalDateTime } from '../src/lib/datetime';
 
 const makeLog = (overrides?: Partial<LogRecord>): LogRecord => ({
   id: randomUUID(),
@@ -39,21 +41,29 @@ describe('LogsManager', () => {
   afterEach(async () => {
     cleanup();
     await db.delete();
+    vi.useRealTimers();
   });
 
   it('renders existing logs from the local database', async () => {
+    const today = dayjs().startOf('day');
+    const yesterday = today.subtract(1, 'day');
+    const todayStart = today.add(15, 'hour').toISOString();
+    const todayEnd = today.add(16, 'hour').toISOString();
+    const yesterdayStart = yesterday.add(8, 'hour').toISOString();
+    const yesterdayEnd = yesterday.add(9, 'hour').toISOString();
+
     await db.logs.bulkPut([
       makeLog({
-        start_at: '2026-01-02T08:00:00Z',
-        end_at: '2026-01-02T09:00:00Z',
+        start_at: yesterdayStart,
+        end_at: yesterdayEnd,
         note: 'Creek walk',
-        updated_at_local: '2026-01-02T09:00:00Z',
+        updated_at_local: yesterdayEnd,
       }),
       makeLog({
-        start_at: '2026-01-03T15:00:00Z',
-        end_at: '2026-01-03T16:30:00Z',
+        start_at: todayStart,
+        end_at: todayEnd,
         note: 'Backyard time',
-        updated_at_local: '2026-01-03T16:30:00Z',
+        updated_at_local: todayEnd,
       }),
     ]);
 
@@ -61,14 +71,23 @@ describe('LogsManager', () => {
 
     expect(await screen.findByText('Creek walk')).toBeTruthy();
     expect(screen.getByText('Backyard time')).toBeTruthy();
-    expect(screen.getByText('Jan 2, 8:00 AM → Jan 2, 9:00 AM')).toBeTruthy();
-    expect(screen.getByText('Jan 3, 3:00 PM → Jan 3, 4:30 PM')).toBeTruthy();
+    expect(screen.getByText('Yesterday')).toBeTruthy();
+    expect(screen.getByText('Today')).toBeTruthy();
+    expect(
+      screen.getByText(
+        `${formatLocalDateTime(yesterdayStart)} → ${formatLocalDateTime(yesterdayEnd)}`,
+      ),
+    ).toBeTruthy();
+    expect(
+      screen.getByText(`${formatLocalDateTime(todayStart)} → ${formatLocalDateTime(todayEnd)}`),
+    ).toBeTruthy();
 
     const section = container.querySelector('section');
-    expect(section?.className).toContain('bg-[#f6f1e6]');
+    expect(section?.className).toContain('bg-wild-paper');
+    expect(section?.className).toContain('animate-fade-in');
 
     const logCard = screen.getByText('Creek walk').closest('article');
-    expect(logCard?.className).toContain('bg-[#fbf7ef]');
+    expect(logCard?.className).toContain('bg-white');
     expect(logCard?.className).toContain('shadow-sm');
   });
 
@@ -77,6 +96,8 @@ describe('LogsManager', () => {
     await db.logs.put(log);
 
     render(<LogsManager db={db} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
 
     const startInput = screen.getByLabelText('Start time') as HTMLInputElement;
     const endInput = screen.getByLabelText('End time') as HTMLInputElement;
@@ -95,6 +116,8 @@ describe('LogsManager', () => {
     const now = vi.fn().mockReturnValue('2026-02-01T11:00:00Z');
 
     render(<LogsManager db={db} now={now} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
 
     fireEvent.change(screen.getByLabelText('Start time'), {
       target: { value: '2026-02-01T09:00' },

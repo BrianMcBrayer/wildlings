@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import dayjs from 'dayjs';
 import type { WildlingsDb } from '../db/db';
 import { useLogs } from '../hooks/useLogs';
 import { clearEditingLogId, setEditingLogId } from '../db/db';
@@ -19,6 +20,7 @@ export const LogsManager = ({ db, now }: LogsManagerProps) => {
   const [editEndAt, setEditEndAt] = useState('');
   const [editNote, setEditNote] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   React.useEffect(() => {
     if (editingId) {
@@ -104,152 +106,215 @@ export const LogsManager = ({ db, now }: LogsManagerProps) => {
     }
   };
 
+  const groupedLogs = useMemo(() => {
+    const today = dayjs().startOf('day');
+    const yesterday = today.subtract(1, 'day');
+
+    return logs.reduce<
+      {
+        key: string;
+        label: string;
+        entries: typeof logs;
+      }[]
+    >((groups, log) => {
+      const logDate = dayjs(log.start_at);
+      const key = logDate.format('YYYY-MM-DD');
+      const existing = groups.find((group) => group.key === key);
+      const label = logDate.isSame(today, 'day')
+        ? 'Today'
+        : logDate.isSame(yesterday, 'day')
+          ? 'Yesterday'
+          : logDate.year() === today.year()
+            ? logDate.format('MMMM D')
+            : logDate.format('MMMM D, YYYY');
+
+      if (existing) {
+        existing.entries.push(log);
+      } else {
+        groups.push({ key, label, entries: [log] });
+      }
+      return groups;
+    }, []);
+  }, [logs]);
+
   return (
-    <section className="rounded-2xl bg-[#f6f1e6] p-6 shadow-sm">
+    <section className="animate-fade-in rounded-3xl bg-wild-paper p-6 shadow-sm ring-1 ring-wild-sand">
       <header className="mb-4">
-        <p className="text-sm uppercase tracking-wide text-slate-500">Logs</p>
-        <h2 className="text-2xl font-semibold text-slate-900">Outdoor entries</h2>
+        <p className="text-xs uppercase tracking-[0.3em] text-wild-stone">Logs</p>
+        <h2 className="text-2xl font-semibold text-wild-bark">Field notes</h2>
       </header>
 
-      <form className="space-y-4" onSubmit={handleSubmit}>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="text-sm text-slate-700">
-            <span className="block text-xs uppercase tracking-wide text-slate-500">Start time</span>
-            <input
-              type="datetime-local"
-              value={startAt}
-              onChange={(event) => setStartAt(event.target.value)}
-              placeholder="2026-01-01T09:00"
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-            />
-          </label>
-          <label className="text-sm text-slate-700">
-            <span className="block text-xs uppercase tracking-wide text-slate-500">End time</span>
-            <input
-              type="datetime-local"
-              value={endAt}
-              onChange={(event) => setEndAt(event.target.value)}
-              placeholder="2026-01-01T10:00"
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-            />
-          </label>
+      <div className="rounded-2xl bg-white/80 p-4 shadow-sm ring-1 ring-wild-sand/70">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-wild-bark">Manual entry</p>
+            <p className="text-xs text-wild-stone">Log a memory from the trail.</p>
+          </div>
+          <button
+            type="button"
+            className="rounded-full bg-wild-moss px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white transition-transform active:scale-95"
+            onClick={() => setIsFormOpen((open) => !open)}
+          >
+            {isFormOpen ? 'Close' : 'Add'}
+          </button>
         </div>
 
-        <label className="text-sm text-slate-700">
-          <span className="block text-xs uppercase tracking-wide text-slate-500">Note</span>
-          <input
-            type="text"
-            value={note}
-            onChange={(event) => setNote(event.target.value)}
-            placeholder="Trail walk"
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-          />
-        </label>
+        {isFormOpen ? (
+          <form className="mt-4 space-y-4" onSubmit={handleSubmit}>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="text-sm text-wild-bark">
+                <span className="block text-xs uppercase tracking-wide text-wild-stone">
+                  Start time
+                </span>
+                <input
+                  type="datetime-local"
+                  value={startAt}
+                  onChange={(event) => setStartAt(event.target.value)}
+                  placeholder="2026-01-01T09:00"
+                  className="mt-1 w-full rounded-xl border border-wild-sand bg-white px-3 py-2 text-sm"
+                />
+              </label>
+              <label className="text-sm text-wild-bark">
+                <span className="block text-xs uppercase tracking-wide text-wild-stone">
+                  End time
+                </span>
+                <input
+                  type="datetime-local"
+                  value={endAt}
+                  onChange={(event) => setEndAt(event.target.value)}
+                  placeholder="2026-01-01T10:00"
+                  className="mt-1 w-full rounded-xl border border-wild-sand bg-white px-3 py-2 text-sm"
+                />
+              </label>
+            </div>
 
-        {error ? <p className="text-sm text-rose-600">{error}</p> : null}
+            <label className="text-sm text-wild-bark">
+              <span className="block text-xs uppercase tracking-wide text-wild-stone">Note</span>
+              <input
+                type="text"
+                value={note}
+                onChange={(event) => setNote(event.target.value)}
+                placeholder="Trail walk"
+                className="mt-1 w-full rounded-xl border border-wild-sand bg-white px-3 py-2 text-sm"
+              />
+            </label>
 
-        <button
-          type="submit"
-          className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
-        >
-          Add log
-        </button>
-      </form>
+            {error ? <p className="text-sm text-wild-clay">{error}</p> : null}
 
-      <div className="mt-6 space-y-3">
+            <button
+              type="submit"
+              className="w-full rounded-full bg-wild-moss px-4 py-3 text-sm font-semibold text-white transition-transform active:scale-95"
+            >
+              Add log
+            </button>
+          </form>
+        ) : null}
+      </div>
+
+      <div className="mt-6 space-y-6">
         {logs.length === 0 ? (
-          <p className="text-sm text-slate-500">No logs yet</p>
+          <p className="text-sm text-wild-stone">No logs yet</p>
         ) : (
-          logs.map((log) => (
-            <article key={log.id} className="rounded-xl bg-[#fbf7ef] p-4 shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="text-sm text-slate-700">
-                    {formatLocalDateTime(log.start_at)} →{' '}
-                    {log.end_at ? formatLocalDateTime(log.end_at) : 'Running'}
-                  </p>
-                  {log.note ? <p className="text-sm text-slate-500">{log.note}</p> : null}
-                  {log.id === activeLogId ? (
-                    <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-amber-600">
-                      Active timer
-                    </p>
+          groupedLogs.map((group) => (
+            <div key={group.key} className="space-y-3">
+              <p className="text-xs uppercase tracking-[0.3em] text-wild-stone">{group.label}</p>
+              {group.entries.map((log) => (
+                <article
+                  key={log.id}
+                  className={`animate-slide-up rounded-xl border-l-4 bg-white p-4 shadow-sm ${
+                    log.id === activeLogId ? 'border-wild-clay' : 'border-wild-fern'
+                  }`}
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <p className="text-sm text-wild-bark">
+                        {formatLocalDateTime(log.start_at)} →{' '}
+                        {log.end_at ? formatLocalDateTime(log.end_at) : 'Running'}
+                      </p>
+                      {log.note ? <p className="text-sm text-wild-stone">{log.note}</p> : null}
+                      {log.id === activeLogId ? (
+                        <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-wild-clay">
+                          Active timer
+                        </p>
+                      ) : null}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        className="text-sm font-semibold text-wild-stone"
+                        onClick={() => beginEdit(log)}
+                        disabled={log.id === activeLogId}
+                      >
+                        Edit log
+                      </button>
+                      <button
+                        type="button"
+                        className="text-sm font-semibold text-wild-clay"
+                        onClick={() => handleDelete(log.id)}
+                        disabled={log.id === activeLogId}
+                      >
+                        Delete log
+                      </button>
+                    </div>
+                  </div>
+                  {editingId === log.id ? (
+                    <div className="mt-4 space-y-3 border-t border-wild-sand pt-4">
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <label className="text-sm text-wild-bark">
+                          <span className="block text-xs uppercase tracking-wide text-wild-stone">
+                            Edit start time
+                          </span>
+                          <input
+                            type="datetime-local"
+                            value={editStartAt}
+                            onChange={(event) => setEditStartAt(event.target.value)}
+                            className="mt-1 w-full rounded-xl border border-wild-sand bg-white px-3 py-2 text-sm"
+                          />
+                        </label>
+                        <label className="text-sm text-wild-bark">
+                          <span className="block text-xs uppercase tracking-wide text-wild-stone">
+                            Edit end time
+                          </span>
+                          <input
+                            type="datetime-local"
+                            value={editEndAt}
+                            onChange={(event) => setEditEndAt(event.target.value)}
+                            className="mt-1 w-full rounded-xl border border-wild-sand bg-white px-3 py-2 text-sm"
+                          />
+                        </label>
+                      </div>
+                      <label className="text-sm text-wild-bark">
+                        <span className="block text-xs uppercase tracking-wide text-wild-stone">
+                          Edit note
+                        </span>
+                        <input
+                          type="text"
+                          value={editNote}
+                          onChange={(event) => setEditNote(event.target.value)}
+                          className="mt-1 w-full rounded-xl border border-wild-sand bg-white px-3 py-2 text-sm"
+                        />
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          className="rounded-full bg-wild-sand px-4 py-2 text-sm font-semibold text-wild-bark transition-transform active:scale-95"
+                          onClick={cancelEdit}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          className="rounded-full bg-wild-moss px-4 py-2 text-sm font-semibold text-white transition-transform active:scale-95"
+                          onClick={saveEdit}
+                        >
+                          Save changes
+                        </button>
+                      </div>
+                    </div>
                   ) : null}
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    className="text-sm font-semibold text-slate-600"
-                    onClick={() => beginEdit(log)}
-                    disabled={log.id === activeLogId}
-                  >
-                    Edit log
-                  </button>
-                  <button
-                    type="button"
-                    className="text-sm font-semibold text-rose-600"
-                    onClick={() => handleDelete(log.id)}
-                    disabled={log.id === activeLogId}
-                  >
-                    Delete log
-                  </button>
-                </div>
-              </div>
-              {editingId === log.id ? (
-                <div className="mt-4 space-y-3 border-t border-slate-200 pt-4">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <label className="text-sm text-slate-700">
-                      <span className="block text-xs uppercase tracking-wide text-slate-500">
-                        Edit start time
-                      </span>
-                      <input
-                        type="datetime-local"
-                        value={editStartAt}
-                        onChange={(event) => setEditStartAt(event.target.value)}
-                        className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                      />
-                    </label>
-                    <label className="text-sm text-slate-700">
-                      <span className="block text-xs uppercase tracking-wide text-slate-500">
-                        Edit end time
-                      </span>
-                      <input
-                        type="datetime-local"
-                        value={editEndAt}
-                        onChange={(event) => setEditEndAt(event.target.value)}
-                        className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                      />
-                    </label>
-                  </div>
-                  <label className="text-sm text-slate-700">
-                    <span className="block text-xs uppercase tracking-wide text-slate-500">
-                      Edit note
-                    </span>
-                    <input
-                      type="text"
-                      value={editNote}
-                      onChange={(event) => setEditNote(event.target.value)}
-                      className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                    />
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      className="rounded-full bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-700"
-                      onClick={cancelEdit}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
-                      onClick={saveEdit}
-                    >
-                      Save changes
-                    </button>
-                  </div>
-                </div>
-              ) : null}
-            </article>
+                </article>
+              ))}
+            </div>
           ))
         )}
       </div>

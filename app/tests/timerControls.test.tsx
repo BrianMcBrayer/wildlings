@@ -32,25 +32,26 @@ describe('TimerControls', () => {
   });
 
   it('starts and stops the timer with persisted log updates', async () => {
-    const now = vi
-      .fn()
-      .mockReturnValueOnce(makeTimestamp('08:00:00'))
-      .mockReturnValueOnce(makeTimestamp('09:00:00'));
+    let currentNow = makeTimestamp('08:00:00');
+    const now = vi.fn(() => currentNow);
 
     const { container } = render(<TimerControls db={db} now={now} />);
 
-    expect(await screen.findByText('Timer idle')).toBeTruthy();
+    expect(await screen.findByText('Ready for adventure?')).toBeTruthy();
+    expect(screen.getByText('00:00:00')).toBeTruthy();
     const section = container.querySelector('section');
-    expect(section?.className).toContain('bg-[#f6f1e6]');
+    expect(section?.className).toContain('bg-wild-paper');
+    expect(section?.className).toContain('animate-fade-in');
 
     fireEvent.click(screen.getByRole('button', { name: 'Start timer' }));
 
     expect(await screen.findByText('Timer running')).toBeTruthy();
     expect(screen.getByText('Started at Jan 1, 8:00 AM')).toBeTruthy();
 
+    currentNow = makeTimestamp('09:00:00');
     fireEvent.click(screen.getByRole('button', { name: 'Stop timer' }));
 
-    expect(await screen.findByText('Timer idle')).toBeTruthy();
+    expect(await screen.findByText('Ready for adventure?')).toBeTruthy();
 
     const storedLogs = await db.logs.toArray();
     expect(storedLogs).toHaveLength(1);

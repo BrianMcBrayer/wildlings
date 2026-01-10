@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import dayjs from 'dayjs';
 import type { WildlingsDb } from '../db/db';
 import { useTimer } from '../hooks/useTimer';
 import { formatLocalDateTime, fromLocalInput, toLocalInput } from '../lib/datetime';
@@ -15,6 +16,7 @@ export const TimerControls = ({ db, now }: TimerControlsProps) => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [adjustStartAt, setAdjustStartAt] = useState('');
+  const [elapsed, setElapsed] = useState('00:00:00');
   const successTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -32,6 +34,33 @@ export const TimerControls = ({ db, now }: TimerControlsProps) => {
       setAdjustStartAt('');
     }
   }, [activeStartAt]);
+
+  useEffect(() => {
+    if (!isActive || !activeStartAt) {
+      setElapsed('00:00:00');
+      return;
+    }
+
+    const updateElapsed = () => {
+      const nowValue = now ? now() : dayjs().toISOString();
+      const diffSeconds = Math.max(
+        0,
+        Math.floor(dayjs(nowValue).diff(dayjs(activeStartAt)) / 1000),
+      );
+      const hours = Math.floor(diffSeconds / 3600);
+      const minutes = Math.floor((diffSeconds % 3600) / 60);
+      const seconds = diffSeconds % 60;
+      setElapsed(
+        `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(
+          seconds,
+        ).padStart(2, '0')}`,
+      );
+    };
+
+    updateElapsed();
+    const intervalId = window.setInterval(updateElapsed, 1000);
+    return () => window.clearInterval(intervalId);
+  }, [activeStartAt, isActive, now]);
 
   const handleStart = async () => {
     setError(null);
@@ -83,51 +112,54 @@ export const TimerControls = ({ db, now }: TimerControlsProps) => {
   };
 
   return (
-    <section className="rounded-2xl bg-[#f6f1e6] p-6 shadow-sm">
-      <header className="mb-4">
-        <p className="text-sm uppercase tracking-wide text-slate-500">Timer</p>
-        <h2 className="text-2xl font-semibold text-slate-900">
-          {isActive ? 'Timer running' : 'Timer idle'}
+    <section className="animate-fade-in rounded-3xl bg-wild-paper p-6 shadow-sm ring-1 ring-wild-sand">
+      <header className="mb-4 space-y-2">
+        <p className="text-xs uppercase tracking-[0.3em] text-wild-stone">Timer</p>
+        <h2 className="text-2xl font-semibold text-wild-bark">
+          {isActive ? 'Timer running' : 'Ready for adventure?'}
         </h2>
         {isActive && activeStartAt ? (
-          <p className="mt-2 text-sm text-slate-600">
-            Started at {formatLocalDateTime(activeStartAt)}
-          </p>
+          <p className="text-sm text-wild-stone">Started at {formatLocalDateTime(activeStartAt)}</p>
         ) : null}
       </header>
 
-      {error ? <p className="mb-3 text-sm text-rose-600">{error}</p> : null}
+      <div className="rounded-3xl bg-white/80 p-6 text-center shadow-sm ring-1 ring-wild-sand/70">
+        <p className="text-xs uppercase tracking-[0.25em] text-wild-stone">Elapsed</p>
+        <p className="mt-2 font-serif text-5xl text-wild-moss">{elapsed}</p>
+      </div>
+
+      {error ? <p className="mt-4 text-sm text-wild-clay">{error}</p> : null}
       {success ? (
-        <p className="mb-3 text-sm font-semibold text-emerald-600" aria-live="polite">
+        <p className="mt-4 text-sm font-semibold text-wild-fern" aria-live="polite">
           {success}
         </p>
       ) : null}
 
-      <div className="space-y-4">
+      <div className="mt-6 space-y-4">
         {isActive ? (
-          <div className="space-y-3 rounded-xl bg-white/70 p-3">
-            <label className="text-sm text-slate-700">
-              <span className="block text-xs uppercase tracking-wide text-slate-500">
+          <div className="space-y-3 rounded-2xl bg-white/70 p-4">
+            <label className="text-sm text-wild-bark">
+              <span className="block text-xs uppercase tracking-wide text-wild-stone">
                 Adjust start time
               </span>
               <input
                 type="datetime-local"
                 value={adjustStartAt}
                 onChange={(event) => setAdjustStartAt(event.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-xl border border-wild-sand bg-white px-3 py-2 text-sm"
               />
             </label>
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
-                className="rounded-full bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-700"
+                className="rounded-full bg-wild-sand px-4 py-2 text-sm font-semibold text-wild-bark transition-transform active:scale-95"
                 onClick={handleAdjustStart}
               >
                 Update start time
               </button>
               <button
                 type="button"
-                className="rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white"
+                className="rounded-full bg-wild-clay px-5 py-2 text-sm font-semibold text-white transition-transform active:scale-95"
                 onClick={handleStop}
               >
                 Stop timer
@@ -137,7 +169,7 @@ export const TimerControls = ({ db, now }: TimerControlsProps) => {
         ) : (
           <button
             type="button"
-            className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
+            className="w-full rounded-full bg-wild-moss px-6 py-4 text-base font-semibold text-white transition-transform active:scale-95"
             onClick={handleStart}
           >
             Start timer

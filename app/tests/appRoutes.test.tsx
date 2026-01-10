@@ -33,7 +33,9 @@ describe('app routes', () => {
     const { container } = render(<RouterProvider router={router} />);
 
     expect(await screen.findByText('Timer')).toBeTruthy();
-    expect(await screen.findByText('Your Outdoor Adventure')).toBeTruthy();
+    expect(await screen.findByText('Your Outdoor Journal')).toBeTruthy();
+    const logoBlock = container.querySelector('[data-testid="wildlings-header"]');
+    expect(logoBlock?.className).toContain('sm:justify-center');
     expect(container.querySelector('[data-testid="app-layout"]')).toBeTruthy();
   });
 
@@ -43,7 +45,7 @@ describe('app routes', () => {
 
     render(<RouterProvider router={router} />);
 
-    expect(await screen.findByText('Outdoor entries')).toBeTruthy();
+    expect(await screen.findByText('Field notes')).toBeTruthy();
   });
 
   it('renders the settings route', async () => {
