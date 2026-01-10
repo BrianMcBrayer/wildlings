@@ -1,17 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-paths=(
-  app
-  api
-  AGENTS.md
-  ARCHITECT.md
-  Dockerfile
-  docker-compose.yml
-)
-
-git ls-files -z -- "${paths[@]}" | uvx --from files-to-prompt files-to-prompt \
-  --null \
+uvx --from files-to-prompt files-to-prompt . \
   --ignore ".DS_Store" \
   --ignore ".env" \
   --ignore ".env.*" \
@@ -44,6 +34,8 @@ git ls-files -z -- "${paths[@]}" | uvx --from files-to-prompt files-to-prompt \
   --ignore "*.gz" \
   --ignore "*.ico" \
   --ignore ".coverage" \
+  --ignore "uv.lock" \
+  --ignore "package-lock.json" \
   --ignore "build" \
   --ignore "dist" \
   --ignore "instance"

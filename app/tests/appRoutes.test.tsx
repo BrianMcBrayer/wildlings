@@ -1,9 +1,18 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { cleanup, render, screen } from '@testing-library/react';
 import { RouterProvider, createMemoryHistory } from '@tanstack/react-router';
 import { createDb, type WildlingsDb } from '../src/db/db';
 import { createAppRouter } from '../src/router';
+
+vi.mock('../src/hooks/useSync', () => ({
+  useSync: vi.fn(() => ({
+    isSyncing: false,
+    lastError: null,
+    syncNow: vi.fn(() => Promise.resolve()),
+    scheduleSync: vi.fn(),
+  })),
+}));
 
 describe('app routes', () => {
   let dbName: string;
