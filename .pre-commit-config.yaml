@@ -24,6 +24,24 @@ repos:
         language: system
         types: [python]
         pass_filenames: true
+      - id: api-tests
+        name: api tests
+        entry: uv run --project api pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: app-tests
+        name: app tests
+        entry: npm --prefix app test
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: app-typecheck
+        name: app typecheck
+        entry: npm --prefix app run typecheck
+        language: system
+        pass_filenames: false
+        always_run: true
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.1.0
     hooks:

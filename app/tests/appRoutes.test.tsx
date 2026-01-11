@@ -22,17 +22,14 @@ describe('app routes', () => {
     dbName = `wildlings-app-${randomUUID()}`;
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     cleanup();
     if (db) {
       db.close();
-      await db.delete();
       db = null;
-    } else {
-      const cleanup = createDb(dbName);
-      cleanup.close();
-      await cleanup.delete();
     }
+    const cleanupDb = createDb(dbName);
+    void cleanupDb.delete().catch(() => {});
   });
 
   it('renders the home route with timer and stats', async () => {
@@ -41,8 +38,8 @@ describe('app routes', () => {
 
     const { container } = render(<RouterProvider router={router} />);
 
-    expect(await screen.findByText('Ready for your next adventure?')).toBeTruthy();
-    expect(await screen.findByText('Time spent outside this year')).toBeTruthy();
+    expect(await screen.findByRole('button', { name: /start adventure/i })).toBeTruthy();
+    expect(await screen.findByTestId('progress-track')).toBeTruthy();
     const logoBlock = container.querySelector('[data-testid="wildlings-header"]');
     expect(logoBlock?.className).toContain('flex');
     expect(container.querySelector('[data-testid="app-layout"]')).toBeTruthy();
