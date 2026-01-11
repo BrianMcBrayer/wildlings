@@ -1,6 +1,5 @@
 import React from 'react';
 import type { WildlingsDb } from '../db/db';
-import { formatDurationHours } from '../db/stats';
 import { useStats } from '../hooks/useStats';
 
 type StatsSummaryProps = {
@@ -9,67 +8,21 @@ type StatsSummaryProps = {
 };
 
 export const StatsSummary = ({ db, year }: StatsSummaryProps) => {
-  const { yearHours, allTimeHours, yearlyGoalHours } = useStats(db, { year });
+  const { yearHours, yearlyGoalHours } = useStats(db, { year });
+  const effectiveGoal = yearlyGoalHours && yearlyGoalHours > 0 ? yearlyGoalHours : 1000;
 
-  const progressPercent =
-    yearlyGoalHours && yearlyGoalHours > 0
-      ? Math.min(100, Math.round((yearHours / yearlyGoalHours) * 100))
-      : 0;
-  const yearHoursLabel = formatDurationHours(yearHours);
-  const allTimeHoursLabel = formatDurationHours(allTimeHours);
+  const progressPercent = Math.min(100, (yearHours / effectiveGoal) * 100);
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="relative overflow-hidden rounded-[2rem] bg-white p-8 shadow-xl shadow-wild-sand/20 ring-1 ring-wild-sand transition-all hover:shadow-2xl hover:shadow-wild-sand/40">
-        <div className="flex flex-col items-center justify-center text-center">
-          <div className="relative mb-6 flex h-48 w-48 items-center justify-center">
-            {/* Background Circle */}
-            <svg className="absolute h-full w-full -rotate-90" viewBox="0 0 100 100">
-              <circle
-                cx="50"
-                cy="50"
-                r="45"
-                fill="none"
-                stroke="#E6E2D6"
-                strokeWidth="8"
-                strokeLinecap="round"
-              />
-              {/* Progress Circle */}
-              <circle
-                cx="50"
-                cy="50"
-                r="45"
-                fill="none"
-                stroke={yearHours > 0 ? '#2B4B3F' : 'transparent'}
-                strokeWidth="8"
-                strokeDasharray={`${progressPercent * 2.83}, 283`}
-                strokeLinecap="round"
-                className="transition-all duration-1000 ease-out"
-              />
-            </svg>
-
-            <div className="flex flex-col items-center gap-1">
-              <span className="font-serif text-5xl font-bold text-wild-moss leading-none">
-                {progressPercent}%
-              </span>
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-wild-stone/70">
-                Of Goal
-              </span>
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <h3 className="font-serif text-3xl font-medium text-wild-bark">{yearHoursLabel}</h3>
-            <p className="text-sm font-medium text-wild-stone">Time spent outside this year</p>
-          </div>
-
-          <div className="mt-6 flex items-center justify-center gap-2 rounded-full bg-wild-paper px-4 py-2">
-            <div className="h-1.5 w-1.5 rounded-full bg-wild-clay" />
-            <p className="text-xs font-bold uppercase tracking-widest text-wild-stone">
-              {yearlyGoalHours ? `Goal: ${yearlyGoalHours}h` : 'No goal set'}
-            </p>
-          </div>
-        </div>
+    <div className="flex w-full items-center gap-4 py-8">
+      <div className="h-3 flex-1 bg-wild-sand rounded-full overflow-hidden border border-wild-sand">
+        <div
+          className="h-full bg-wild-moss transition-all duration-300 ease-out"
+          style={{ width: `${progressPercent}%`, minWidth: yearHours > 0 ? '4px' : 0 }}
+        />
+      </div>
+      <div className="font-serif text-sm font-medium text-wild-bark shrink-0 tabular-nums">
+        {yearHours.toFixed(1)} / {effectiveGoal}
       </div>
     </div>
   );

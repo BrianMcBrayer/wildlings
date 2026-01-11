@@ -44,16 +44,12 @@ describe('StatsSummary', () => {
 
     render(<StatsSummary db={db} year={2026} />);
 
-    expect(await screen.findByText('Goal: 4h')).toBeTruthy();
-    expect(screen.getByText('Time spent outside this year')).toBeTruthy();
-    expect(screen.getAllByText('2h 0m')).toHaveLength(1);
-    expect(screen.getByText('50%')).toBeTruthy();
+    expect(await screen.findByText('2.0 / 4')).toBeTruthy();
   });
 
-  it('renders a no-goal message when the year has no configured goal', async () => {
+  it('defaults to 1000 hours goal when no goal is set', async () => {
     render(<StatsSummary db={db} year={2026} />);
 
-    expect(await screen.findByText('No goal set')).toBeTruthy();
-    expect(screen.getByText('Time spent outside this year')).toBeTruthy();
+    expect(await screen.findByText('0.0 / 1000')).toBeTruthy();
   });
 });
