@@ -37,7 +37,6 @@ describe('TimerControls', () => {
 
     const { container } = render(<TimerControls db={db} now={now} />);
 
-    expect(await screen.findByText('Ready for your next adventure?')).toBeTruthy();
     expect(screen.getByText('00:00:00.000')).toBeTruthy();
     const section = container.querySelector('section');
     expect(section?.className).toContain('animate-fade-in');
@@ -49,10 +48,10 @@ describe('TimerControls', () => {
     currentNow = makeTimestamp('09:00:00');
     fireEvent.click(screen.getByRole('button', { name: /Finish/i }));
 
-    expect(await screen.findByText('Ready for your next adventure?')).toBeTruthy();
-
-    const storedLogs = await db.logs.toArray();
-    expect(storedLogs).toHaveLength(1);
-    expect(storedLogs[0].end_at).toBe(makeTimestamp('09:00:00'));
+    await vi.waitFor(async () => {
+      const storedLogs = await db.logs.toArray();
+      expect(storedLogs).toHaveLength(1);
+      expect(storedLogs[0].end_at).toBe(makeTimestamp('09:00:00'));
+    });
   });
 });

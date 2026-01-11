@@ -111,12 +111,6 @@ export const TimerControls = ({ db, now }: TimerControlsProps) => {
         <div className="relative z-10 font-serif text-[4rem] font-medium leading-none tracking-tight text-wild-bark tabular-nums sm:text-[6rem]">
           {elapsed}
         </div>
-
-        <div className="mt-2 flex items-center justify-center gap-2">
-          <p className="font-medium text-wild-stone/80">
-            {isActive ? 'Time in the wild' : 'Ready for your next adventure?'}
-          </p>
-        </div>
       </div>
 
       {error ? (
