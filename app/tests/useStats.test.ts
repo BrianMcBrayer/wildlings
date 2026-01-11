@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { randomUUID } from 'node:crypto';
-import { createDb, setYearlyGoal } from '../src/db/db';
+import { createDb, setActiveTimer, setYearlyGoal } from '../src/db/db';
 import type { LogRecord } from '../src/db/db';
 import { useStats } from '../src/hooks/useStats';
 
@@ -89,11 +89,41 @@ describe('useStats', () => {
       }),
     );
 
-    await act(async () => {
-      await result.current.refresh();
+    await waitFor(() => expect(result.current.yearHours).toBeCloseTo(1, 5));
+
+    unmount();
+  });
+
+  it('includes active timer duration while running', async () => {
+    const db = createDb(dbName);
+    const logId = randomUUID();
+    let nowValue = new Date('2026-01-01T08:00:00Z').valueOf();
+
+    await db.logs.put(
+      makeLog({
+        id: logId,
+        start_at: makeTimestamp('2026-01-01T08:00:00Z'),
+        end_at: null,
+        updated_at_local: makeTimestamp('2026-01-01T08:00:00Z'),
+      }),
+    );
+    await setActiveTimer(db, { logId, startAt: makeTimestamp('2026-01-01T08:00:00Z') });
+
+    const { result, unmount } = renderHook(() =>
+      useStats(db, {
+        year: 2026,
+        now: () => new Date(nowValue).toISOString(),
+        tickMs: 10,
+      }),
+    );
+
+    await waitFor(() => expect(result.current.yearHours).toBeCloseTo(0, 5));
+
+    act(() => {
+      nowValue += 60 * 60 * 1000;
     });
 
-    expect(result.current.yearHours).toBeCloseTo(1, 5);
+    await waitFor(() => expect(result.current.yearHours).toBeCloseTo(1, 2));
 
     unmount();
   });

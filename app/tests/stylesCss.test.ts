@@ -10,4 +10,11 @@ describe('styles.css', () => {
 
     expect(contents).not.toContain('@apply');
   });
+
+  it('pins the Tailwind config so custom theme colors are available', () => {
+    const stylesPath = resolve(process.cwd(), 'src/styles.css');
+    const contents = readFileSync(stylesPath, 'utf-8');
+
+    expect(contents).toContain('@config "../tailwind.config.cjs";');
+  });
 });

@@ -74,6 +74,10 @@ export const TimerControls = ({ db, now }: TimerControlsProps) => {
             type="button"
             onClick={handleStart}
             className="group relative flex aspect-square w-full max-w-[min(85vw,50vh)] flex-col items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-wild-paper shadow-[0_15px_40px_rgba(16,185,129,0.4),0_8px_15px_rgba(0,0,0,0.1),inset_0_-6px_8px_rgba(0,0,0,0.2)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_25px_50px_rgba(16,185,129,0.5),0_12px_20px_rgba(0,0,0,0.15),inset_0_-6px_8px_rgba(0,0,0,0.2)] active:scale-95 active:shadow-[inset_0_6px_15px_rgba(0,0,0,0.3)]"
+            style={{
+              backgroundImage: 'linear-gradient(135deg, #10b981, #059669)',
+              color: '#F7F5EE',
+            }}
           >
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/30 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
 
@@ -91,6 +95,7 @@ export const TimerControls = ({ db, now }: TimerControlsProps) => {
             type="button"
             onClick={handleStop}
             className="group relative flex aspect-square w-full max-w-[min(85vw,50vh)] flex-col items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-red-600 text-white shadow-[0_15px_40px_rgba(239,68,68,0.4),0_8px_15px_rgba(0,0,0,0.1),inset_0_-6px_8px_rgba(0,0,0,0.2)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_25px_50px_rgba(239,68,68,0.5),0_12px_20px_rgba(0,0,0,0.15),inset_0_-6px_8px_rgba(0,0,0,0.2)] active:scale-95 active:shadow-[inset_0_6px_15px_rgba(0,0,0,0.3)]"
+            style={{ backgroundImage: 'linear-gradient(135deg, #ef4444, #dc2626)' }}
           >
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/30 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
 

@@ -10,6 +10,39 @@ services:
       - STATIC_DIR=/app/app/dist
       - CORS_ALLOW_ORIGINS=
       - INTERNAL_SYNC_TOKEN=
+      - UVICORN_EXTRA_ARGS=--reload
+
+    # NEW: Watch configuration
+    develop:
+      watch:
+        # 1. Rebuild if configuration/dependencies change
+        - action: rebuild
+          path: ./api/pyproject.toml
+        - action: rebuild
+          path: ./api/uv.lock
+        - action: rebuild
+          path: ./app/package.json
+        - action: rebuild
+          path: ./app/package-lock.json
+        - action: rebuild
+          path: ./Dockerfile
+
+        # 2. Frontend: REBUILD image on change (Runtime image has no Node/npm)
+        - action: rebuild
+          path: ./app
+          ignore:
+            - node_modules/
+            - dist/
+            - .tanstack/
+
+        # 3. Backend: SYNC changes (Hot Reload works via uvicorn)
+        - action: sync
+          path: ./api
+          target: /app/api
+          ignore:
+            - __pycache__/
+            - '*.pyc'
+
     healthcheck:
       test:
         - CMD-SHELL

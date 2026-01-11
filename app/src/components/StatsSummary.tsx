@@ -15,10 +15,28 @@ export const StatsSummary = ({ db, year }: StatsSummaryProps) => {
 
   return (
     <div className="flex w-full items-center gap-4 py-8">
-      <div className="h-3 flex-1 bg-wild-sand rounded-full overflow-hidden border border-wild-sand">
+      <div
+        className="flex-1"
+        data-testid="progress-track"
+        style={{
+          backgroundColor: 'black',
+          borderColor: 'black',
+          borderRadius: '9999px',
+          borderStyle: 'solid',
+          borderWidth: '1px',
+          height: '8px',
+          overflow: 'hidden',
+        }}
+      >
         <div
-          className="h-full bg-wild-moss transition-all duration-300 ease-out"
-          style={{ width: `${progressPercent}%`, minWidth: yearHours > 0 ? '4px' : 0 }}
+          className="transition-all duration-300 ease-out"
+          data-testid="progress-fill"
+          style={{
+            width: `${progressPercent}%`,
+            minWidth: yearHours > 0 ? '4px' : 0,
+            backgroundColor: 'green',
+            height: '100%',
+          }}
         />
       </div>
       <div className="font-serif text-sm font-medium text-wild-bark shrink-0 tabular-nums">

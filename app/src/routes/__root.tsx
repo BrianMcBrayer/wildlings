@@ -19,18 +19,18 @@ function RootLayout() {
     <div className="min-h-screen bg-wild-paper pb-24 text-wild-bark sm:pb-0">
       <div className="mx-auto w-full max-w-2xl px-4 sm:px-6" data-testid="app-layout">
         <header
-          className="flex items-center justify-between py-6 sm:py-10"
+          className="relative flex flex-col justify-center gap-4 py-6 sm:py-10"
           data-testid="wildlings-header"
         >
-          <div className="flex items-center gap-4">
-            <div>
-              <h1 className="font-serif text-3xl font-black tracking-tight text-wild-moss sm:text-4xl">
-                Wildlings
-              </h1>
-              <p className="text-xs font-bold uppercase tracking-widest text-wild-stone/80">
-                Outdoor Journal
-              </p>
-            </div>
+          <div className="text-center">
+            <h1 className="font-serif text-3xl font-black tracking-tight text-wild-moss sm:text-4xl">
+              Wildlings
+            </h1>
+            <p className="text-xs font-bold uppercase tracking-widest text-wild-stone/80">
+              Outdoor Journal
+            </p>
+          </div>
+          <div className="flex items-center justify-center gap-4">
             <nav className="hidden items-center gap-1 rounded-full bg-wild-sand/30 p-1 sm:flex">
               <Link
                 to="/"
@@ -52,7 +52,9 @@ function RootLayout() {
               </Link>
             </nav>
           </div>
-          <SyncStatus db={db} />
+          <div className="absolute right-4 top-6 sm:right-6 sm:top-10">
+            <SyncStatus db={db} />
+          </div>
         </header>
 
         <main className="animate-fade-in space-y-6">

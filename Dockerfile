@@ -24,6 +24,7 @@ ENV STATIC_DIR=/app/app/dist
 ENV DATABASE_URL=sqlite:////data/wildlings.db
 ENV PATH="/app/api/.venv/bin:$PATH"
 ENV PYTHONPATH=/app
+ENV UVICORN_EXTRA_ARGS=""
 
 RUN useradd --create-home --shell /usr/sbin/nologin wildlings \
     && mkdir -p /data \
@@ -31,4 +32,4 @@ RUN useradd --create-home --shell /usr/sbin/nologin wildlings \
 USER wildlings
 
 EXPOSE 8000
-CMD ["sh","-c","cd /app/api && alembic -c /app/api/alembic.ini upgrade head && uvicorn api.main:app --app-dir /app --host 0.0.0.0 --port 8000"]
+CMD ["sh","-c","cd /app/api && alembic -c /app/api/alembic.ini upgrade head && uvicorn api.main:app --app-dir /app --host 0.0.0.0 --port 8000 $UVICORN_EXTRA_ARGS"]

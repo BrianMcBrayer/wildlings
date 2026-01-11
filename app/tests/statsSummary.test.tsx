@@ -52,4 +52,26 @@ describe('StatsSummary', () => {
 
     expect(await screen.findByText('0.0 / 1000')).toBeTruthy();
   });
+
+  it('renders a black track with a green fill', async () => {
+    await db.logs.bulkPut([
+      makeLog({
+        start_at: '2026-01-01T08:00:00Z',
+        end_at: '2026-01-01T10:00:00Z',
+        updated_at_local: '2026-01-01T10:00:00Z',
+      }),
+    ]);
+    await setYearlyGoal(db, { year: 2026, hours: 10 });
+
+    render(<StatsSummary db={db} year={2026} />);
+
+    await screen.findByText('2.0 / 10');
+
+    const track = screen.getByTestId('progress-track');
+    const fill = screen.getByTestId('progress-fill');
+
+    expect(track.style.backgroundColor).toBe('black');
+    expect(fill.style.backgroundColor).toBe('green');
+    expect(fill.style.width).toContain('%');
+  });
 });
