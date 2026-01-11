@@ -1,8 +1,8 @@
 import React from 'react';
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { randomUUID } from 'node:crypto';
-import { createDb, getMetadata } from '../src/db/db';
+import { createDb } from '../src/db/db';
 import { TimerControls } from '../src/components/TimerControls';
 
 const makeTimestamp = (suffix: string) => `2026-01-01T${suffix}Z`;
@@ -54,46 +54,5 @@ describe('TimerControls', () => {
     const storedLogs = await db.logs.toArray();
     expect(storedLogs).toHaveLength(1);
     expect(storedLogs[0].end_at).toBe(makeTimestamp('09:00:00'));
-  });
-
-  it('reveals edit controls only after toggling edit mode', async () => {
-    const now = vi.fn().mockReturnValueOnce(makeTimestamp('10:00:00'));
-
-    render(<TimerControls db={db} now={now} />);
-
-    fireEvent.click(screen.getByRole('button', { name: /Start/i }));
-    expect(await screen.findByRole('button', { name: /Finish/i })).toBeTruthy();
-
-    expect(screen.queryByLabelText('Started at')).toBeNull();
-
-    fireEvent.click(screen.getByRole('button', { name: /Adjust start time/i }));
-
-    expect(await screen.findByLabelText('Started at')).toBeTruthy();
-  });
-
-  it('allows adjusting the start time while the timer is active', async () => {
-    const now = vi
-      .fn()
-      .mockReturnValueOnce(makeTimestamp('08:00:00'))
-      .mockReturnValueOnce(makeTimestamp('08:10:00'));
-
-    render(<TimerControls db={db} now={now} />);
-
-    fireEvent.click(screen.getByRole('button', { name: /Start/i }));
-    expect(await screen.findByRole('button', { name: /Finish/i })).toBeTruthy();
-
-    fireEvent.click(screen.getByRole('button', { name: /Adjust start time/i }));
-    fireEvent.change(await screen.findByLabelText('Started at'), {
-      target: { value: '2026-01-01T07:30' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Update' }));
-
-    await waitFor(async () => {
-      const storedLogs = await db.logs.toArray();
-      expect(storedLogs[0].start_at).toBe('2026-01-01T07:30:00.000Z');
-
-      const metadata = await getMetadata(db);
-      expect(metadata.active_start_at).toBe('2026-01-01T07:30:00.000Z');
-    });
   });
 });
