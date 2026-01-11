@@ -38,13 +38,13 @@ describe('TimerControls', () => {
     const { container } = render(<TimerControls db={db} now={now} />);
 
     expect(await screen.findByText('Ready for your next adventure?')).toBeTruthy();
-    expect(screen.getByText('00:00:00')).toBeTruthy();
+    expect(screen.getByText('00:00:00.000')).toBeTruthy();
     const section = container.querySelector('section');
     expect(section?.className).toContain('animate-fade-in');
 
     fireEvent.click(screen.getByRole('button', { name: /Start/i }));
 
-    expect(await screen.findByText('Active Session')).toBeTruthy();
+    expect(await screen.findByRole('button', { name: /Finish/i })).toBeTruthy();
 
     currentNow = makeTimestamp('09:00:00');
     fireEvent.click(screen.getByRole('button', { name: /Finish/i }));
@@ -62,7 +62,7 @@ describe('TimerControls', () => {
     render(<TimerControls db={db} now={now} />);
 
     fireEvent.click(screen.getByRole('button', { name: /Start/i }));
-    expect(await screen.findByText('Active Session')).toBeTruthy();
+    expect(await screen.findByRole('button', { name: /Finish/i })).toBeTruthy();
 
     expect(screen.queryByLabelText('Started at')).toBeNull();
 
@@ -80,7 +80,7 @@ describe('TimerControls', () => {
     render(<TimerControls db={db} now={now} />);
 
     fireEvent.click(screen.getByRole('button', { name: /Start/i }));
-    expect(await screen.findByText('Active Session')).toBeTruthy();
+    expect(await screen.findByRole('button', { name: /Finish/i })).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: /Adjust start time/i }));
     fireEvent.change(await screen.findByLabelText('Started at'), {

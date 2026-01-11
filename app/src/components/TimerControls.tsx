@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import type { WildlingsDb } from '../db/db';
 import { useTimer } from '../hooks/useTimer';
 import { fromLocalInput, toLocalInput } from '../lib/datetime';
-import { Edit2, Play, Square } from 'lucide-react';
+import { Edit2 } from 'lucide-react';
 
 type TimerControlsProps = {
   db: WildlingsDb;
@@ -17,7 +17,7 @@ export const TimerControls = ({ db, now }: TimerControlsProps) => {
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [adjustStartAt, setAdjustStartAt] = useState('');
-  const [elapsed, setElapsed] = useState('00:00:00');
+  const [elapsed, setElapsed] = useState('00:00:00.000');
 
   useEffect(() => {
     if (activeStartAt) {
@@ -29,28 +29,27 @@ export const TimerControls = ({ db, now }: TimerControlsProps) => {
 
   useEffect(() => {
     if (!isActive || !activeStartAt) {
-      setElapsed('00:00:00');
+      setElapsed('00:00:00.000');
       return;
     }
 
     const updateElapsed = () => {
       const nowValue = now ? now() : dayjs().toISOString();
-      const diffSeconds = Math.max(
-        0,
-        Math.floor(dayjs(nowValue).diff(dayjs(activeStartAt)) / 1000),
-      );
-      const hours = Math.floor(diffSeconds / 3600);
-      const minutes = Math.floor((diffSeconds % 3600) / 60);
-      const seconds = diffSeconds % 60;
+      const diffMs = Math.max(0, dayjs(nowValue).diff(dayjs(activeStartAt)));
+      const hours = Math.floor(diffMs / 3600000);
+      const minutes = Math.floor((diffMs % 3600000) / 60000);
+      const seconds = Math.floor((diffMs % 60000) / 1000);
+      const milliseconds = diffMs % 1000;
+
       setElapsed(
         `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(
           seconds,
-        ).padStart(2, '0')}`,
+        ).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`,
       );
     };
 
     updateElapsed();
-    const intervalId = window.setInterval(updateElapsed, 1000);
+    const intervalId = window.setInterval(updateElapsed, 30);
     return () => window.clearInterval(intervalId);
   }, [activeStartAt, isActive, now]);
 
@@ -97,62 +96,21 @@ export const TimerControls = ({ db, now }: TimerControlsProps) => {
         <div className="absolute bottom-0 right-1/4 h-64 w-64 rounded-full bg-wild-fern/10 blur-3xl" />
       </div>
 
-      <header className="mb-8 flex flex-col items-center gap-2">
-        <div
-          className={`flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-widest transition-colors ${
-            isActive ? 'bg-red-100 text-red-600' : 'bg-wild-sand/50 text-wild-stone'
-          }`}
-        >
-          {isActive ? (
-            <>
-              <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-              <span>Active Session</span>
-            </>
-          ) : (
-            <span>Timer Ready</span>
-          )}
-        </div>
-      </header>
-
-      {/* Main Timer Display */}
-      <div className="relative mb-10">
-        <div className="relative z-10 font-serif text-[5.5rem] font-medium leading-none tracking-tight text-wild-bark tabular-nums sm:text-[7rem]">
-          {elapsed}
-        </div>
-
-        {isActive && (
-          <button
-            type="button"
-            aria-label="Adjust start time"
-            onClick={() => setIsEditing((prev) => !prev)}
-            className="absolute -right-6 top-1/2 -translate-y-1/2 translate-x-full rounded-full bg-wild-sand/50 p-2 text-wild-stone transition-colors hover:bg-wild-sand hover:text-wild-bark sm:right-0 sm:translate-x-12"
-          >
-            <Edit2 className="h-5 w-5" />
-          </button>
-        )}
-
-        <p className="mt-2 font-medium text-wild-stone/80">
-          {isActive ? 'Time in the wild' : 'Ready for your next adventure?'}
-        </p>
-      </div>
-
       {/* Action Button */}
-
-      <div className="flex w-full justify-center">
+      <div className="flex w-full justify-center px-4 mb-8">
         {!isActive ? (
           <button
             type="button"
             onClick={handleStart}
-            className="group relative flex h-72 w-72 aspect-square flex-col items-center justify-center gap-5 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-wild-paper shadow-[0_10px_30px_rgba(16,185,129,0.3),0_6px_10px_rgba(0,0,0,0.1),inset_0_-4px_6px_rgba(0,0,0,0.15)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(16,185,129,0.4),0_10px_10px_rgba(0,0,0,0.1),inset_0_-4px_6px_rgba(0,0,0,0.15)] active:scale-95 active:shadow-[inset_0_4px_12px_rgba(0,0,0,0.25)]"
+            className="group relative flex aspect-square w-full max-w-[min(85vw,50vh)] flex-col items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-wild-paper shadow-[0_15px_40px_rgba(16,185,129,0.4),0_8px_15px_rgba(0,0,0,0.1),inset_0_-6px_8px_rgba(0,0,0,0.2)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_25px_50px_rgba(16,185,129,0.5),0_12px_20px_rgba(0,0,0,0.15),inset_0_-6px_8px_rgba(0,0,0,0.2)] active:scale-95 active:shadow-[inset_0_6px_15px_rgba(0,0,0,0.3)]"
           >
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/30 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
 
-            <Play className="h-20 w-20 fill-current pl-2 transition-transform group-hover:scale-110" />
-
-            <div className="flex flex-col items-center gap-1">
-              <span className="text-2xl font-bold tracking-wide uppercase">Start</span>
-
-              <span className="text-sm font-bold uppercase tracking-widest opacity-80">
+            <div className="flex flex-col items-center justify-center text-center">
+              <span className="text-[min(18vw,12vh)] font-black uppercase leading-[0.75] tracking-tighter">
+                Start
+              </span>
+              <span className="mt-2 text-[min(6vw,4vh)] font-bold uppercase tracking-[0.2em] opacity-90">
                 Adventure
               </span>
             </div>
@@ -161,21 +119,44 @@ export const TimerControls = ({ db, now }: TimerControlsProps) => {
           <button
             type="button"
             onClick={handleStop}
-            className="group relative flex h-72 w-72 aspect-square flex-col items-center justify-center gap-5 rounded-full bg-gradient-to-br from-red-500 to-red-600 text-white shadow-[0_10px_30px_rgba(239,68,68,0.3),0_6px_10px_rgba(0,0,0,0.1),inset_0_-4px_6px_rgba(0,0,0,0.15)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_20px_40px_rgba(239,68,68,0.4),0_10px_10px_rgba(0,0,0,0.1),inset_0_-4px_6px_rgba(0,0,0,0.15)] active:scale-95 active:shadow-[inset_0_4px_12px_rgba(0,0,0,0.25)]"
+            className="group relative flex aspect-square w-full max-w-[min(85vw,50vh)] flex-col items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-red-600 text-white shadow-[0_15px_40px_rgba(239,68,68,0.4),0_8px_15px_rgba(0,0,0,0.1),inset_0_-6px_8px_rgba(0,0,0,0.2)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_25px_50px_rgba(239,68,68,0.5),0_12px_20px_rgba(0,0,0,0.15),inset_0_-6px_8px_rgba(0,0,0,0.2)] active:scale-95 active:shadow-[inset_0_6px_15px_rgba(0,0,0,0.3)]"
           >
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/30 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
 
-            <Square className="h-16 w-16 fill-current transition-transform group-hover:scale-110" />
-
-            <div className="flex flex-col items-center gap-1">
-              <span className="text-2xl font-bold tracking-wide uppercase">Finish</span>
-
-              <span className="text-sm font-bold uppercase tracking-widest opacity-80">
+            <div className="flex flex-col items-center justify-center text-center">
+              <span className="text-[min(18vw,12vh)] font-black uppercase leading-[0.75] tracking-tighter">
+                Finish
+              </span>
+              <span className="mt-2 text-[min(6vw,4vh)] font-bold uppercase tracking-[0.2em] opacity-90">
                 Adventure
               </span>
             </div>
           </button>
         )}
+      </div>
+
+      {/* Main Timer Display */}
+      <div className="relative mb-10">
+        <div className="relative z-10 font-serif text-[4rem] font-medium leading-none tracking-tight text-wild-bark tabular-nums sm:text-[6rem]">
+          {elapsed}
+        </div>
+
+        <div className="mt-2 flex items-center justify-center gap-2">
+          <p className="font-medium text-wild-stone/80">
+            {isActive ? 'Time in the wild' : 'Ready for your next adventure?'}
+          </p>
+          {isActive && (
+            <button
+              type="button"
+              aria-label="Adjust start time"
+              onClick={() => setIsEditing((prev) => !prev)}
+              className="rounded-full p-2 text-wild-stone transition-colors hover:bg-wild-sand hover:text-wild-bark focus:outline-none focus:ring-2 focus:ring-wild-moss/50"
+              title="Adjust start time"
+            >
+              <Edit2 className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {error ? (
